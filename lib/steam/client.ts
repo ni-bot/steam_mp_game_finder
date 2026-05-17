@@ -113,17 +113,14 @@ function extractVanityFromUrl(input: string): string | null {
   return null;
 }
 
-export async function getOwnedGames(
-  steamId: string,
-  options?: { skipCache?: boolean }
-): Promise<OwnedGamesPayload | null> {
-  const cacheKey = ownedGamesCacheKey(steamId);
+export type OwnedGamesFetchResult =
+  | { kind: "ok"; payload: OwnedGamesPayload }
+  | { kind: "private" }
+  | { kind: "error" };
 
-  if (!options?.skipCache) {
-    const cached = await cacheGet<OwnedGamesPayload>(cacheKey);
-    if (cached) return cached;
-  }
-
+async function fetchOwnedGamesFromApi(
+  steamId: string
+): Promise<OwnedGamesFetchResult> {
   const apiKey = getApiKey();
   const url = `${STEAM_API_BASE}/IPlayerService/GetOwnedGames/v1/?key=${apiKey}&steamid=${steamId}&include_appinfo=1&include_played_free_games=1&format=json`;
 
@@ -139,7 +136,7 @@ export async function getOwnedGames(
       data.response.game_count === undefined &&
       data.response.games === undefined
     ) {
-      return null;
+      return { kind: "private" };
     }
 
     const payload: OwnedGamesPayload = {
@@ -147,11 +144,34 @@ export async function getOwnedGames(
       lastUpdated: new Date().toISOString(),
     };
 
-    await cacheSet(cacheKey, payload);
-    return payload;
+    await cacheSet(ownedGamesCacheKey(steamId), payload);
+    return { kind: "ok", payload };
   } catch {
-    return null;
+    return { kind: "error" };
   }
+}
+
+export async function fetchOwnedGames(
+  steamId: string,
+  options?: { skipCache?: boolean }
+): Promise<OwnedGamesFetchResult> {
+  const cacheKey = ownedGamesCacheKey(steamId);
+
+  if (!options?.skipCache) {
+    const cached = await cacheGet<OwnedGamesPayload>(cacheKey);
+    if (cached) return { kind: "ok", payload: cached };
+  }
+
+  return fetchOwnedGamesFromApi(steamId);
+}
+
+export async function getOwnedGames(
+  steamId: string,
+  options?: { skipCache?: boolean }
+): Promise<OwnedGamesPayload | null> {
+  const result = await fetchOwnedGames(steamId, options);
+  if (result.kind === "ok") return result.payload;
+  return null;
 }
 
 export async function invalidateOwnedGames(steamId: string): Promise<void> {

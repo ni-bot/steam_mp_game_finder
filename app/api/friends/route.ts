@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { isPublicProfile } from "@/lib/display/person-label";
+import { probeLibraryStatusMap } from "@/lib/steam/library-status";
 import { getFriendList, getPlayerSummaries } from "@/lib/steam/client";
 
 export async function GET() {
@@ -17,7 +17,10 @@ export async function GET() {
     return NextResponse.json({ friends: [] });
   }
 
-  const profiles = await getPlayerSummaries(friendIds);
+  const [profiles, libraryStatusMap] = await Promise.all([
+    getPlayerSummaries(friendIds),
+    probeLibraryStatusMap(friendIds),
+  ]);
   const profileMap = new Map(profiles.map((p) => [p.steamid, p]));
 
   const result = friends.map((f) => {
@@ -26,9 +29,7 @@ export async function GET() {
       steamid: f.steamid,
       personaname: profile?.personaname ?? f.steamid,
       avatarfull: profile?.avatarfull ?? "",
-      profilePrivate: profile
-        ? !isPublicProfile(profile.communityvisibilitystate)
-        : true,
+      libraryStatus: libraryStatusMap.get(f.steamid) ?? "error",
     };
   });
 

@@ -4,13 +4,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { PersonLabel } from "@/components/PersonLabel";
 import { SelectableFriendAvatar } from "@/components/SelectableFriendAvatar";
+import type { LibraryStatus } from "@/lib/steam/types";
 
 export interface FriendOption {
   steamid: string;
   personaname: string;
   avatarfull: string;
   manual?: boolean;
-  profilePrivate?: boolean;
+  libraryStatus?: LibraryStatus;
 }
 
 const STORAGE_KEY = "steam-mp-selected-friends";
@@ -104,13 +105,21 @@ export function FriendPicker({
     );
   }, [allFriends, search]);
 
-  const publicFriends = useMemo(
-    () => filtered.filter((f) => !f.profilePrivate),
+  const publicLibraryFriends = useMemo(
+    () => filtered.filter((f) => f.libraryStatus === "ok"),
     [filtered]
   );
 
-  const privateFriends = useMemo(
-    () => filtered.filter((f) => f.profilePrivate),
+  const privateLibraryFriends = useMemo(
+    () => filtered.filter((f) => f.libraryStatus === "private"),
+    [filtered]
+  );
+
+  const uncheckedLibraryFriends = useMemo(
+    () =>
+      filtered.filter(
+        (f) => f.libraryStatus === "error" || f.libraryStatus === undefined
+      ),
     [filtered]
   );
 
@@ -210,13 +219,13 @@ export function FriendPicker({
           <p className="text-sm text-[var(--steam-muted)]">{t("noFriends")}</p>
         ) : (
           <>
-            {publicFriends.length > 0 && (
+            {publicLibraryFriends.length > 0 && (
               <section>
                 <h3 className="mb-1 px-2 text-xs font-medium uppercase tracking-wide text-[var(--steam-muted)]">
-                  {t("publicProfiles")}
+                  {t("publicLibraries")}
                 </h3>
                 <div className="space-y-1">
-                  {publicFriends.map((friend) => (
+                  {publicLibraryFriends.map((friend) => (
                     <FriendRow
                       key={friend.steamid}
                       friend={friend}
@@ -228,13 +237,31 @@ export function FriendPicker({
                 </div>
               </section>
             )}
-            {privateFriends.length > 0 && (
+            {privateLibraryFriends.length > 0 && (
               <section>
                 <h3 className="mb-1 px-2 text-xs font-medium uppercase tracking-wide text-[var(--steam-muted)]">
-                  {t("privateProfiles")}
+                  {t("privateLibraries")}
                 </h3>
                 <div className="space-y-1">
-                  {privateFriends.map((friend) => (
+                  {privateLibraryFriends.map((friend) => (
+                    <FriendRow
+                      key={friend.steamid}
+                      friend={friend}
+                      selected={selected}
+                      onToggle={toggle}
+                      manualLabel={t("manualBadge")}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+            {uncheckedLibraryFriends.length > 0 && (
+              <section>
+                <h3 className="mb-1 px-2 text-xs font-medium uppercase tracking-wide text-[var(--steam-muted)]">
+                  {t("uncheckedLibraries")}
+                </h3>
+                <div className="space-y-1">
+                  {uncheckedLibraryFriends.map((friend) => (
                     <FriendRow
                       key={friend.steamid}
                       friend={friend}

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { isPublicProfile } from "@/lib/display/person-label";
+import { probeLibraryStatus } from "@/lib/steam/library-status";
 import { getPlayerSummaries, resolveVanityUrl } from "@/lib/steam/client";
 
 export async function POST(request: NextRequest) {
@@ -25,7 +25,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "self" }, { status: 400 });
   }
 
-  const profiles = await getPlayerSummaries([steamId]);
+  const [profiles, libraryStatus] = await Promise.all([
+    getPlayerSummaries([steamId]),
+    probeLibraryStatus(steamId),
+  ]);
   const profile = profiles[0];
 
   return NextResponse.json({
@@ -33,9 +36,7 @@ export async function POST(request: NextRequest) {
       steamid: steamId,
       personaname: profile?.personaname ?? steamId,
       avatarfull: profile?.avatarfull ?? "",
-      profilePrivate: profile
-        ? !isPublicProfile(profile.communityvisibilitystate)
-        : true,
+      libraryStatus,
       manual: true,
     },
   });

@@ -4,8 +4,3 @@ export function formatPersonLabel(name: string, steamId: string): string {
   if (!trimmed || trimmed === steamId) return steamId;
   return `${trimmed} (${steamId})`;
 }
-
-/** Steam communityvisibilitystate: 3 = public profile. */
-export function isPublicProfile(communityvisibilitystate?: number): boolean {
-  return communityvisibilitystate === 3;
-}
