@@ -55,7 +55,7 @@
     "doesNotOwn": "Besitzt nicht",
     "matchStrict": "Spiele die alle haben",
     "matchNear": "Einer muss was kaufen",
-    "matchNearHint": "Auf jeder Karte istmarkiert, wer das Spiel nicht besitzt. Der Vergleich kann länger dauern.",
+    "matchNearHint": "Auf jeder Karte ist markiert, wer das Spiel nicht besitzt. Der Vergleich kann länger dauern.",
     "combined": "Gesamt",
     "lastUpdated": "Aktualisiert: {time}",
     "storeLink": "Steam Store",
