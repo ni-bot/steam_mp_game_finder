@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { signOut } from "next-auth/react";
+import { ChangelogModal } from "@/components/ChangelogModal";
 import { PersonLabel } from "@/components/PersonLabel";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { THEMES, type ThemeId } from "@/lib/theme";
@@ -16,8 +17,10 @@ interface UserMenuProps {
 export function UserMenu({ name, steamId, image }: UserMenuProps) {
   const tNav = useTranslations("nav");
   const tTheme = useTranslations("theme");
+  const tChangelog = useTranslations("changelog");
   const { theme, setTheme, lightMode, setLightMode } = useTheme();
   const [open, setOpen] = useState(false);
+  const [changelogOpen, setChangelogOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -123,6 +126,17 @@ export function UserMenu({ name, steamId, image }: UserMenuProps) {
               />
             </label>
           </div>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setChangelogOpen(true);
+              setOpen(false);
+            }}
+            className="w-full px-3 py-2 text-left text-sm hover:bg-[var(--steam-hover)] transition-colors"
+          >
+            {tChangelog("menu")}
+          </button>
           <div
             className="my-1 border-t border-[var(--steam-border)]"
             role="separator"
@@ -137,6 +151,11 @@ export function UserMenu({ name, steamId, image }: UserMenuProps) {
           </button>
         </div>
       )}
+
+      <ChangelogModal
+        open={changelogOpen}
+        onClose={() => setChangelogOpen(false)}
+      />
     </div>
   );
 }

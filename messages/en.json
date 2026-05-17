@@ -15,6 +15,11 @@
     "grove": "Grove",
     "lightMode": "Light mode"
   },
+  "changelog": {
+    "menu": "Changes",
+    "title": "What's new?",
+    "close": "Close"
+  },
   "friends": {
     "title": "Select friends",
     "search": "Search friends…",

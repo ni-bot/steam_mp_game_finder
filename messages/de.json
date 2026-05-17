@@ -15,6 +15,11 @@
     "grove": "Hain",
     "lightMode": "Hellmodus"
   },
+  "changelog": {
+    "menu": "Änderungen",
+    "title": "Was ist neu?",
+    "close": "Schließen"
+  },
   "friends": {
     "title": "Freunde auswählen",
     "search": "Freunde suchen…",
