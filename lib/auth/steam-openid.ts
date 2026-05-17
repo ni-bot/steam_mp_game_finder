@@ -1,5 +1,8 @@
 import openid from "openid";
 
+/** Steam OP identifier for discovery (not the /login endpoint). */
+const STEAM_OPENID_IDENTIFIER = "https://steamcommunity.com/openid/";
+
 const STEAM_OPENID_REALM = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000";
 
 export function getSteamOpenId(): openid.RelyingParty {
@@ -23,7 +26,7 @@ export function getSteamLoginUrl(): Promise<string> {
   const relyingParty = getSteamOpenId();
   return new Promise((resolve, reject) => {
     relyingParty.authenticate(
-      "https://steamcommunity.com/openid/login",
+      STEAM_OPENID_IDENTIFIER,
       false,
       (error, authUrl) => {
         if (error) reject(error);
