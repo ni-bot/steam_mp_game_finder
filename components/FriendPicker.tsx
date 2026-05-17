@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { PersonLabel } from "@/components/PersonLabel";
+import { SelectableFriendAvatar } from "@/components/SelectableFriendAvatar";
 
 export interface FriendOption {
   steamid: string;
@@ -33,31 +34,40 @@ function FriendRow({
   onToggle: (steamid: string) => void;
   manualLabel: string;
 }) {
+  const isSelected = selected.has(friend.steamid);
+
   return (
-    <label className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 hover:bg-[var(--steam-hover)]">
-      <input
-        type="checkbox"
-        checked={selected.has(friend.steamid)}
-        onChange={() => onToggle(friend.steamid)}
-        className="accent-[var(--steam-accent)]"
+    <button
+      type="button"
+      aria-pressed={isSelected}
+      onClick={() => onToggle(friend.steamid)}
+      className={[
+        "flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors duration-150",
+        "border-l-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-[var(--steam-accent)]",
+        isSelected
+          ? "border-l-[var(--steam-accent)] bg-[var(--steam-hover)]"
+          : "border-l-transparent hover:bg-[var(--steam-hover)]",
+      ].join(" ")}
+    >
+      <SelectableFriendAvatar
+        src={friend.avatarfull}
+        selected={isSelected}
+        size="md"
       />
-      {friend.avatarfull ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={friend.avatarfull} alt="" className="h-8 w-8 rounded" />
-      ) : (
-        <div className="h-8 w-8 rounded bg-[var(--steam-panel)]" />
-      )}
       <PersonLabel
         name={friend.personaname}
         steamId={friend.steamid}
-        className="min-w-0 flex-1 truncate text-sm"
+        className={[
+          "min-w-0 flex-1 truncate text-sm",
+          isSelected ? "font-medium" : "",
+        ].join(" ")}
       />
       {friend.manual && (
         <span className="shrink-0 text-xs text-[var(--steam-muted)]">
           {manualLabel}
         </span>
       )}
-    </label>
+    </button>
   );
 }
 
@@ -173,9 +183,16 @@ export function FriendPicker({
   return (
     <aside className="flex min-h-0 flex-1 flex-col border-r border-[var(--steam-border)] bg-[var(--steam-bg-dark)]">
       <div className="shrink-0 p-4 pb-3">
-        <h2 className="mb-3 text-lg font-semibold text-[var(--steam-accent)]">
-          {t("title")}
-        </h2>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold text-[var(--steam-accent)]">
+            {t("title")}
+          </h2>
+          {selected.size > 0 && (
+            <span className="shrink-0 rounded-full bg-[var(--steam-panel)] px-2.5 py-0.5 text-xs font-medium text-[var(--steam-accent)]">
+              {t("selected", { count: selected.size })}
+            </span>
+          )}
+        </div>
 
         <p className="mb-3 text-xs text-[var(--steam-muted)]">{t("privacyHint")}</p>
 

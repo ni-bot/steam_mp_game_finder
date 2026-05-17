@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { PersonLabel } from "@/components/PersonLabel";
+import { SelectableFriendAvatar } from "@/components/SelectableFriendAvatar";
 import type { FriendOption } from "@/components/FriendPicker";
 
 interface SelectedFriendsBarProps {
@@ -51,19 +52,14 @@ export function SelectedFriendsBar({
               key={friend.steamid}
               type="button"
               onClick={() => removeOne(friend.steamid)}
-              className="flex max-w-xs items-center gap-1.5 rounded-full border border-[var(--steam-border)] bg-[var(--steam-panel)] px-2 py-1 text-xs hover:border-[var(--steam-accent)] hover:bg-[var(--steam-hover)] transition-colors"
+              className="flex max-w-xs items-center gap-1.5 rounded-full border border-[var(--steam-accent)]/40 bg-[var(--steam-panel)] px-2 py-1 text-xs transition-colors hover:border-[var(--steam-accent)] hover:bg-[var(--steam-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-[var(--steam-accent)]"
               title={t("removeOne")}
             >
-              {friend.avatarfull ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={friend.avatarfull}
-                  alt=""
-                  className="h-5 w-5 rounded-full"
-                />
-              ) : (
-                <span className="h-5 w-5 rounded-full bg-[var(--steam-bg)]" />
-              )}
+              <SelectableFriendAvatar
+                src={friend.avatarfull}
+                selected
+                size="sm"
+              />
               <span className="truncate">
                 <PersonLabel name={friend.personaname} steamId={friend.steamid} />
               </span>
