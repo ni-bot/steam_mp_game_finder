@@ -34,7 +34,26 @@
     "selectionBar": "Ausgewählte Mitspieler",
     "noneSelected": "Noch niemand ausgewählt",
     "resetSelection": "Auswahl zurücksetzen",
-    "removeOne": "Aus der Auswahl entfernen"
+    "removeOne": "Aus der Auswahl entfernen",
+    "loading": {
+      "title": "Freundesliste wird geladen",
+      "phaseFriends": "Steam-Freundesliste abrufen…",
+      "phaseProfiles": "Profile und Avatare laden…",
+      "phaseLibraries": "Spielbibliotheken prüfen…",
+      "progressProfiles": "{total, plural, one {# Freund} other {# Freunde}} insgesamt",
+      "progressLibraries": "{loaded} / {total} Bibliotheken geprüft",
+      "checkingFriend": "Zuletzt geprüft",
+      "tip0": "Steam zählt auch Spiele, die du nur zur Sammlung hast.",
+      "tip1": "Wir ignorieren deine 400 Stunden in einem Singleplayer-Spiel — versprochen.",
+      "tip2": "Öffentliche Bibliotheken sind der Schlüssel. Privatsphäre ist okay, nur nicht vergleichbar.",
+      "tip3": "Der Server fragt Valve höflich um eure Spielelisten.",
+      "tip4": "Noch ein Freund… noch ein Freund…",
+      "tip5": "Wusstest du? „Nie gespielt“ zählt trotzdem als besessen.",
+      "tip6": "Gleich seht ihr, wer die meisten ungespielten Mehrspieler-Spiele hortet.",
+      "tip7": "Valve API arbeitet mit — manchmal in Zeitlupe.",
+      "tip8": "Wir sortieren nach Namen, nicht nach Skill.",
+      "tip9": "Fast da. Dann dürft ihr euch gegenseitig Schuldzuweisungen schicken."
+    }
   },
   "status": {
     "ok": "Bibliothek geladen",

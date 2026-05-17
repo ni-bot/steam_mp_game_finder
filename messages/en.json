@@ -34,7 +34,26 @@
     "selectionBar": "Selected teammates",
     "noneSelected": "No one selected yet",
     "resetSelection": "Reset selection",
-    "removeOne": "Remove from selection"
+    "removeOne": "Remove from selection",
+    "loading": {
+      "title": "Loading your friends",
+      "phaseFriends": "Fetching Steam friend list…",
+      "phaseProfiles": "Loading profiles and avatars…",
+      "phaseLibraries": "Checking game libraries…",
+      "progressProfiles": "{total, plural, one {# friend} other {# friends}} total",
+      "progressLibraries": "{loaded} / {total} libraries checked",
+      "checkingFriend": "Last checked",
+      "tip0": "Steam counts games you only own for the badge, too.",
+      "tip1": "We promise not to judge your 400 hours in a single-player game.",
+      "tip2": "Public libraries are the key. Private is fine — just not comparable.",
+      "tip3": "The server is politely asking Valve for your friends' libraries.",
+      "tip4": "One more friend… one more friend…",
+      "tip5": "Fun fact: \"Never played\" still counts as owned.",
+      "tip6": "Soon you'll see who hoards the most unplayed multiplayer games.",
+      "tip7": "The Valve API is on it — sometimes in slow motion.",
+      "tip8": "We sort by name, not by skill.",
+      "tip9": "Almost there. Then you can blame each other for what to buy."
+    }
   },
   "status": {
     "ok": "Library loaded",

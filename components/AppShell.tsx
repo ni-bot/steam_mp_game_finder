@@ -1,10 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { Header } from "@/components/Header";
 import { FriendPicker, type FriendOption } from "@/components/FriendPicker";
+import {
+  FriendsLoadModal,
+  type FriendsLoadCurrentFriend,
+  type FriendsLoadPhase,
+} from "@/components/FriendsLoadModal";
 import { SelectedFriendsBar } from "@/components/SelectedFriendsBar";
 import { ResultsPanel } from "@/components/ResultsPanel";
 import { sortGames } from "@/lib/compare/sort";
@@ -35,20 +40,89 @@ export function AppShell() {
   const [sort, setSort] = useState<SortMode>("low_playtime");
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
   const [loadingFriends, setLoadingFriends] = useState(false);
+  const [loadPhase, setLoadPhase] = useState<FriendsLoadPhase | null>(null);
+  const [loadTotal, setLoadTotal] = useState(0);
+  const [loadProgress, setLoadProgress] = useState(0);
+  const [loadCurrentFriend, setLoadCurrentFriend] =
+    useState<FriendsLoadCurrentFriend | null>(null);
   const [loadingCompare, setLoadingCompare] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const friendsStreamRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
     if (status !== "authenticated") return;
 
     setLoadingFriends(true);
-    fetch("/api/friends")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.friends) setFriends(data.friends);
-      })
-      .catch(() => setError(tErrors("generic")))
-      .finally(() => setLoadingFriends(false));
+    setLoadPhase("friends");
+    setLoadTotal(0);
+    setLoadProgress(0);
+    setLoadCurrentFriend(null);
+    setError(null);
+
+    const es = new EventSource("/api/friends/stream");
+    friendsStreamRef.current = es;
+    let completed = false;
+
+    es.addEventListener("phase", (e) => {
+      const data = JSON.parse(e.data) as { phase: FriendsLoadPhase };
+      setLoadPhase(data.phase);
+    });
+
+    es.addEventListener("total", (e) => {
+      const data = JSON.parse(e.data) as { total: number };
+      setLoadTotal(data.total);
+    });
+
+    es.addEventListener("progress", (e) => {
+      const data = JSON.parse(e.data) as {
+        loaded: number;
+        total: number;
+        steamid: string;
+        personaname: string;
+        avatarfull: string;
+      };
+      setLoadProgress(data.loaded);
+      setLoadTotal(data.total);
+      setLoadCurrentFriend({
+        steamid: data.steamid,
+        personaname: data.personaname,
+        avatarfull: data.avatarfull,
+      });
+    });
+
+    es.addEventListener("done", (e) => {
+      completed = true;
+      const data = JSON.parse(e.data) as { friends: FriendOption[] };
+      setFriends(data.friends ?? []);
+      setLoadingFriends(false);
+      setLoadPhase(null);
+      es.close();
+      friendsStreamRef.current = null;
+    });
+
+    es.addEventListener("failed", () => {
+      completed = true;
+      setError(tErrors("generic"));
+      setLoadingFriends(false);
+      setLoadPhase(null);
+      es.close();
+      friendsStreamRef.current = null;
+    });
+
+    es.onerror = () => {
+      if (completed || friendsStreamRef.current !== es) return;
+      completed = true;
+      setError(tErrors("generic"));
+      setLoadingFriends(false);
+      setLoadPhase(null);
+      es.close();
+      friendsStreamRef.current = null;
+    };
+
+    return () => {
+      es.close();
+      friendsStreamRef.current = null;
+    };
   }, [status, tErrors]);
 
   const runCompare = useCallback(
@@ -143,6 +217,15 @@ export function AppShell() {
         compareLoading={loadingCompare}
       />
 
+      {loadingFriends && (
+        <FriendsLoadModal
+          phase={loadPhase}
+          total={loadTotal}
+          loaded={loadProgress}
+          currentFriend={loadCurrentFriend}
+        />
+      )}
+
       {!session ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-6 p-8">
           <p className="max-w-md text-center text-lg text-[var(--steam-muted)]">
@@ -166,39 +249,36 @@ export function AppShell() {
             onSelectionChange={setSelected}
           />
           <div className="flex min-h-0 flex-1 overflow-hidden pt-14">
-          <div className="flex h-full w-full max-w-sm shrink-0 flex-col overflow-hidden">
-            {loadingFriends && (
-              <p className="shrink-0 p-4 text-sm text-[var(--steam-muted)]">…</p>
-            )}
-            <FriendPicker
-              friends={friends}
-              manualFriends={manualFriends}
-              onManualFriendsChange={setManualFriends}
-              selected={selected}
-              onSelectionChange={setSelected}
-            />
-          </div>
+            <div className="flex h-full w-full max-w-sm shrink-0 flex-col overflow-hidden">
+              <FriendPicker
+                friends={friends}
+                manualFriends={manualFriends}
+                onManualFriendsChange={setManualFriends}
+                selected={selected}
+                onSelectionChange={setSelected}
+              />
+            </div>
 
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-            {error && (
-              <p className="shrink-0 p-4 text-sm text-red-400">{error}</p>
-            )}
-            <ResultsPanel
-              result={result}
-              multiplayerOnly={multiplayerOnly}
-              onMultiplayerOnlyChange={setMultiplayerOnly}
-              matchMode={matchMode}
-              onMatchModeChange={setMatchMode}
-              buyerFilterSteamId={buyerFilterSteamId}
-              onBuyerFilterChange={setBuyerFilterSteamId}
-              sort={sort}
-              onSortChange={handleSortChange}
-              selectedTags={selectedTags}
-              onSelectedTagsChange={setSelectedTags}
-              loading={loadingCompare}
-            />
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+              {error && (
+                <p className="shrink-0 p-4 text-sm text-red-400">{error}</p>
+              )}
+              <ResultsPanel
+                result={result}
+                multiplayerOnly={multiplayerOnly}
+                onMultiplayerOnlyChange={setMultiplayerOnly}
+                matchMode={matchMode}
+                onMatchModeChange={setMatchMode}
+                buyerFilterSteamId={buyerFilterSteamId}
+                onBuyerFilterChange={setBuyerFilterSteamId}
+                sort={sort}
+                onSortChange={handleSortChange}
+                selectedTags={selectedTags}
+                onSelectedTagsChange={setSelectedTags}
+                loading={loadingCompare}
+              />
+            </div>
           </div>
-        </div>
         </>
       )}
     </div>
