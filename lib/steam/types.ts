@@ -3,6 +3,7 @@ export interface SteamPlayer {
   personaname: string;
   avatarfull: string;
   avatar: string;
+  communityvisibilitystate?: number;
 }
 
 export interface OwnedGame {

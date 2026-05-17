@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { Header } from "@/components/Header";
 import { FriendPicker, type FriendOption } from "@/components/FriendPicker";
+import { SelectedFriendsBar } from "@/components/SelectedFriendsBar";
 import { ResultsPanel } from "@/components/ResultsPanel";
 import type { CompareResponse, MatchMode, SortMode } from "@/lib/steam/types";
 
@@ -15,7 +16,15 @@ export function AppShell() {
   const tErrors = useTranslations("errors");
 
   const [friends, setFriends] = useState<FriendOption[]>([]);
+  const [manualFriends, setManualFriends] = useState<FriendOption[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  const allFriends = useMemo(() => {
+    const map = new Map<string, FriendOption>();
+    for (const f of friends) map.set(f.steamid, f);
+    for (const f of manualFriends) map.set(f.steamid, f);
+    return [...map.values()];
+  }, [friends, manualFriends]);
   const [result, setResult] = useState<CompareResponse | null>(null);
   const [multiplayerOnly, setMultiplayerOnly] = useState(true);
   const [matchMode, setMatchMode] = useState<MatchMode>("strict");
@@ -124,13 +133,21 @@ export function AppShell() {
           </button>
         </div>
       ) : (
-        <div className="flex min-h-0 flex-1">
+        <>
+          <SelectedFriendsBar
+            friends={allFriends}
+            selected={selected}
+            onSelectionChange={setSelected}
+          />
+          <div className="flex min-h-0 flex-1 pt-14">
           <div className="w-full max-w-sm shrink-0">
             {loadingFriends && (
               <p className="p-4 text-sm text-[var(--steam-muted)]">…</p>
             )}
             <FriendPicker
               friends={friends}
+              manualFriends={manualFriends}
+              onManualFriendsChange={setManualFriends}
               selected={selected}
               onSelectionChange={setSelected}
               onCompare={() => runCompare(false)}
@@ -154,6 +171,7 @@ export function AppShell() {
             />
           </div>
         </div>
+        </>
       )}
     </div>
   );

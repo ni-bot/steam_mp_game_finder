@@ -20,7 +20,14 @@
     "manyWarning": "Many friends selected — comparison may take a while.",
     "privacyHint": "Game libraries must be public (Profile → Edit → Game details: Public).",
     "noFriends": "No friends loaded. Add profiles via URL.",
-    "selected": "{count} selected"
+    "selected": "{count} selected",
+    "publicProfiles": "Public profiles",
+    "privateProfiles": "Private profiles",
+    "manualBadge": "URL",
+    "selectionBar": "Selected teammates",
+    "noneSelected": "No one selected yet",
+    "resetSelection": "Reset selection",
+    "removeOne": "Remove from selection"
   },
   "status": {
     "ok": "Library loaded",
@@ -47,7 +54,8 @@
     "matchNearHint": "In n-1 mode, each card marks who doesn't own the game. Comparison may take longer.",
     "combined": "Combined",
     "lastUpdated": "Updated: {time}",
-    "storeLink": "Steam Store"
+    "storeLink": "Steam Store",
+    "privateLibraries": "Library not visible"
   },
   "landing": {
     "signInPrompt": "Sign in with Steam to load your friend list and find shared multiplayer games."

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { isPublicProfile } from "@/lib/display/person-label";
 import { getPlayerSummaries, resolveVanityUrl } from "@/lib/steam/client";
 
 export async function POST(request: NextRequest) {
@@ -32,6 +33,9 @@ export async function POST(request: NextRequest) {
       steamid: steamId,
       personaname: profile?.personaname ?? steamId,
       avatarfull: profile?.avatarfull ?? "",
+      profilePrivate: profile
+        ? !isPublicProfile(profile.communityvisibilitystate)
+        : true,
       manual: true,
     },
   });

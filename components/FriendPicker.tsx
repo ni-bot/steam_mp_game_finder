@@ -2,26 +2,69 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { formatPersonLabel } from "@/lib/display/person-label";
 
 export interface FriendOption {
   steamid: string;
   personaname: string;
   avatarfull: string;
   manual?: boolean;
+  profilePrivate?: boolean;
 }
 
 const STORAGE_KEY = "steam-mp-selected-friends";
 
 interface FriendPickerProps {
   friends: FriendOption[];
+  manualFriends: FriendOption[];
+  onManualFriendsChange: (friends: FriendOption[]) => void;
   selected: Set<string>;
   onSelectionChange: (selected: Set<string>) => void;
   onCompare: () => void;
   loading?: boolean;
 }
 
+function FriendRow({
+  friend,
+  selected,
+  onToggle,
+  manualLabel,
+}: {
+  friend: FriendOption;
+  selected: Set<string>;
+  onToggle: (steamid: string) => void;
+  manualLabel: string;
+}) {
+  return (
+    <label className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 hover:bg-[var(--steam-hover)]">
+      <input
+        type="checkbox"
+        checked={selected.has(friend.steamid)}
+        onChange={() => onToggle(friend.steamid)}
+        className="accent-[var(--steam-accent)]"
+      />
+      {friend.avatarfull ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={friend.avatarfull} alt="" className="h-8 w-8 rounded" />
+      ) : (
+        <div className="h-8 w-8 rounded bg-[var(--steam-panel)]" />
+      )}
+      <span className="min-w-0 flex-1 truncate text-sm">
+        {formatPersonLabel(friend.personaname, friend.steamid)}
+      </span>
+      {friend.manual && (
+        <span className="shrink-0 text-xs text-[var(--steam-muted)]">
+          {manualLabel}
+        </span>
+      )}
+    </label>
+  );
+}
+
 export function FriendPicker({
   friends,
+  manualFriends,
+  onManualFriendsChange,
   selected,
   onSelectionChange,
   onCompare,
@@ -31,7 +74,6 @@ export function FriendPicker({
   const tErrors = useTranslations("errors");
   const [search, setSearch] = useState("");
   const [manualUrl, setManualUrl] = useState("");
-  const [manualFriends, setManualFriends] = useState<FriendOption[]>([]);
   const [resolveError, setResolveError] = useState<string | null>(null);
   const [resolving, setResolving] = useState(false);
 
@@ -53,6 +95,16 @@ export function FriendPicker({
         f.steamid.includes(q)
     );
   }, [allFriends, search]);
+
+  const publicFriends = useMemo(
+    () => filtered.filter((f) => !f.profilePrivate),
+    [filtered]
+  );
+
+  const privateFriends = useMemo(
+    () => filtered.filter((f) => f.profilePrivate),
+    [filtered]
+  );
 
   useEffect(() => {
     try {
@@ -103,10 +155,9 @@ export function FriendPicker({
         return;
       }
       const friend = data.friend as FriendOption;
-      setManualFriends((prev) => {
-        if (prev.some((f) => f.steamid === friend.steamid)) return prev;
-        return [...prev, { ...friend, manual: true }];
-      });
+      if (!manualFriends.some((f) => f.steamid === friend.steamid)) {
+        onManualFriendsChange([...manualFriends, { ...friend, manual: true }]);
+      }
       const next = new Set(selected);
       next.add(friend.steamid);
       onSelectionChange(next);
@@ -137,43 +188,48 @@ export function FriendPicker({
         className="mb-3 w-full rounded border border-[var(--steam-border)] bg-[var(--steam-bg)] px-3 py-2 text-sm outline-none focus:border-[var(--steam-accent)]"
       />
 
-      <p className="mb-2 text-xs text-[var(--steam-muted)]">
-        {t("selected", { count: selected.size })}
-      </p>
-
-      <div className="min-h-0 flex-1 overflow-y-auto space-y-1">
+      <div className="min-h-0 flex-1 overflow-y-auto space-y-3">
         {filtered.length === 0 ? (
           <p className="text-sm text-[var(--steam-muted)]">{t("noFriends")}</p>
         ) : (
-          filtered.map((friend) => (
-            <label
-              key={friend.steamid}
-              className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 hover:bg-[var(--steam-hover)]"
-            >
-              <input
-                type="checkbox"
-                checked={selected.has(friend.steamid)}
-                onChange={() => toggle(friend.steamid)}
-                className="accent-[var(--steam-accent)]"
-              />
-              {friend.avatarfull ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={friend.avatarfull}
-                  alt=""
-                  className="h-8 w-8 rounded"
-                />
-              ) : (
-                <div className="h-8 w-8 rounded bg-[var(--steam-panel)]" />
-              )}
-              <span className="truncate text-sm">{friend.personaname}</span>
-              {friend.manual && (
-                <span className="ml-auto text-xs text-[var(--steam-muted)]">
-                  URL
-                </span>
-              )}
-            </label>
-          ))
+          <>
+            {publicFriends.length > 0 && (
+              <section>
+                <h3 className="mb-1 px-2 text-xs font-medium uppercase tracking-wide text-[var(--steam-muted)]">
+                  {t("publicProfiles")}
+                </h3>
+                <div className="space-y-1">
+                  {publicFriends.map((friend) => (
+                    <FriendRow
+                      key={friend.steamid}
+                      friend={friend}
+                      selected={selected}
+                      onToggle={toggle}
+                      manualLabel={t("manualBadge")}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+            {privateFriends.length > 0 && (
+              <section>
+                <h3 className="mb-1 px-2 text-xs font-medium uppercase tracking-wide text-[var(--steam-muted)]">
+                  {t("privateProfiles")}
+                </h3>
+                <div className="space-y-1">
+                  {privateFriends.map((friend) => (
+                    <FriendRow
+                      key={friend.steamid}
+                      friend={friend}
+                      selected={selected}
+                      onToggle={toggle}
+                      manualLabel={t("manualBadge")}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
         )}
       </div>
 

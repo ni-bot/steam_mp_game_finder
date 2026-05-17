@@ -2,6 +2,7 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { signOut, useSession } from "next-auth/react";
+import { formatPersonLabel } from "@/lib/display/person-label";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -56,7 +57,12 @@ export function Header({ onRefresh, showRefresh }: HeaderProps) {
                 className="h-8 w-8 rounded"
               />
             )}
-            <span className="text-sm">{session.user.name}</span>
+            <span className="text-sm">
+              {formatPersonLabel(
+                session.user.name ?? session.user.steamId,
+                session.user.steamId
+              )}
+            </span>
             <button
               type="button"
               onClick={() => signOut()}

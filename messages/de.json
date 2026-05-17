@@ -20,7 +20,14 @@
     "manyWarning": "Viele Freunde ausgewählt — der Vergleich kann etwas dauern.",
     "privacyHint": "Spielbibliotheken müssen öffentlich sein (Profil → Bearbeiten → Spieldetails: Öffentlich).",
     "noFriends": "Keine Freunde geladen. Füge Profile per URL hinzu.",
-    "selected": "{count} ausgewählt"
+    "selected": "{count} ausgewählt",
+    "publicProfiles": "Öffentliche Profile",
+    "privateProfiles": "Private Profile",
+    "manualBadge": "URL",
+    "selectionBar": "Ausgewählte Mitspieler",
+    "noneSelected": "Noch niemand ausgewählt",
+    "resetSelection": "Auswahl zurücksetzen",
+    "removeOne": "Aus der Auswahl entfernen"
   },
   "status": {
     "ok": "Bibliothek geladen",
@@ -47,7 +54,8 @@
     "matchNearHint": "Im n-1-Modus ist auf jeder Karte markiert, wer das Spiel nicht besitzt. Der Vergleich kann länger dauern.",
     "combined": "Gesamt",
     "lastUpdated": "Aktualisiert: {time}",
-    "storeLink": "Steam Store"
+    "storeLink": "Steam Store",
+    "privateLibraries": "Bibliothek nicht sichtbar"
   },
   "landing": {
     "signInPrompt": "Melde dich mit Steam an, um deine Freundesliste zu laden und gemeinsame Mehrspieler-Spiele zu finden."

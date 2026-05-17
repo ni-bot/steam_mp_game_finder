@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { isPublicProfile } from "@/lib/display/person-label";
 import { getFriendList, getPlayerSummaries } from "@/lib/steam/client";
 
 export async function GET() {
@@ -25,6 +26,9 @@ export async function GET() {
       steamid: f.steamid,
       personaname: profile?.personaname ?? f.steamid,
       avatarfull: profile?.avatarfull ?? "",
+      profilePrivate: profile
+        ? !isPublicProfile(profile.communityvisibilitystate)
+        : true,
     };
   });
 

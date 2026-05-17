@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { GameCard } from "@/components/GameCard";
 import { FriendStatusBadge } from "@/components/FriendStatusBadge";
+import { formatPersonLabel } from "@/lib/display/person-label";
 import type { CompareResponse, MatchMode, SortMode } from "@/lib/steam/types";
 
 interface ResultsPanelProps {
@@ -19,6 +20,34 @@ interface ResultsPanelProps {
 function formatTime(iso: string | undefined, locale: string) {
   if (!iso) return "—";
   return new Date(iso).toLocaleString(locale);
+}
+
+function ParticipantChip({
+  p,
+  locale,
+  t,
+}: {
+  p: CompareResponse["participants"][number];
+  locale: string;
+  t: ReturnType<typeof useTranslations<"results">>;
+}) {
+  return (
+    <div className="flex items-center gap-2 rounded border border-[var(--steam-border)] bg-[var(--steam-bg-dark)] px-3 py-2 text-sm">
+      {p.avatarUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={p.avatarUrl} alt="" className="h-6 w-6 rounded" />
+      )}
+      <span>{formatPersonLabel(p.displayName, p.steamId)}</span>
+      <FriendStatusBadge status={p.status} />
+      {p.lastUpdated && (
+        <span className="text-xs text-[var(--steam-muted)]">
+          {t("lastUpdated", {
+            time: formatTime(p.lastUpdated, locale),
+          })}
+        </span>
+      )}
+    </div>
+  );
 }
 
 export function ResultsPanel({
@@ -114,27 +143,40 @@ export function ResultsPanel({
       )}
 
       {result?.participants && result.participants.length > 0 && (
-        <div className="mb-4 flex flex-wrap gap-3">
-          {result.participants.map((p) => (
-            <div
-              key={p.steamId}
-              className="flex items-center gap-2 rounded border border-[var(--steam-border)] bg-[var(--steam-bg-dark)] px-3 py-2 text-sm"
-            >
-              {p.avatarUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={p.avatarUrl} alt="" className="h-6 w-6 rounded" />
-              )}
-              <span>{p.displayName}</span>
-              <FriendStatusBadge status={p.status} />
-              {p.lastUpdated && (
-                <span className="text-xs text-[var(--steam-muted)]">
-                  {t("lastUpdated", {
-                    time: formatTime(p.lastUpdated, locale),
-                  })}
-                </span>
-              )}
+        <div className="mb-4 space-y-3">
+          {result.participants.filter((p) => p.status === "ok").length > 0 && (
+            <div className="flex flex-wrap gap-3">
+              {result.participants
+                .filter((p) => p.status === "ok")
+                .map((p) => (
+                  <ParticipantChip
+                    key={p.steamId}
+                    p={p}
+                    locale={locale}
+                    t={t}
+                  />
+                ))}
             </div>
-          ))}
+          )}
+          {result.participants.filter((p) => p.status !== "ok").length > 0 && (
+            <section>
+              <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-[var(--steam-muted)]">
+                {t("privateLibraries")}
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {result.participants
+                  .filter((p) => p.status !== "ok")
+                  .map((p) => (
+                    <ParticipantChip
+                      key={p.steamId}
+                      p={p}
+                      locale={locale}
+                      t={t}
+                    />
+                  ))}
+              </div>
+            </section>
+          )}
         </div>
       )}
 
@@ -159,7 +201,7 @@ export function ResultsPanel({
                 .filter((p) => p.status === "ok")
                 .map((p) => ({
                   steamId: p.steamId,
-                  displayName: p.displayName,
+                  displayName: formatPersonLabel(p.displayName, p.steamId),
                 }))}
             />
           ))}
