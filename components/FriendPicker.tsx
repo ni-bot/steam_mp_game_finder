@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { formatPersonLabel } from "@/lib/display/person-label";
+import { PersonLabel } from "@/components/PersonLabel";
 
 export interface FriendOption {
   steamid: string;
@@ -47,9 +47,11 @@ function FriendRow({
       ) : (
         <div className="h-8 w-8 rounded bg-[var(--steam-panel)]" />
       )}
-      <span className="min-w-0 flex-1 truncate text-sm">
-        {formatPersonLabel(friend.personaname, friend.steamid)}
-      </span>
+      <PersonLabel
+        name={friend.personaname}
+        steamId={friend.steamid}
+        className="min-w-0 flex-1 truncate text-sm"
+      />
       {friend.manual && (
         <span className="shrink-0 text-xs text-[var(--steam-muted)]">
           {manualLabel}

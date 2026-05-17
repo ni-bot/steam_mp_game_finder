@@ -35,17 +35,39 @@ async function steamFetch<T>(url: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export async function getPlayerSummaries(
+/** Steam Web API allows at most 100 steamids per GetPlayerSummaries call. */
+const PLAYER_SUMMARIES_BATCH_SIZE = 100;
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const batches: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    batches.push(items.slice(i, i + size));
+  }
+  return batches;
+}
+
+async function fetchPlayerSummariesBatch(
   steamIds: string[]
 ): Promise<SteamPlayer[]> {
-  if (steamIds.length === 0) return [];
-
   const key = getApiKey();
   const url = `${STEAM_API_BASE}/ISteamUser/GetPlayerSummaries/v2/?key=${key}&steamids=${steamIds.join(",")}`;
   const data = await steamFetch<{
     response: { players: SteamPlayer[] };
   }>(url);
   return data.response.players ?? [];
+}
+
+export async function getPlayerSummaries(
+  steamIds: string[]
+): Promise<SteamPlayer[]> {
+  if (steamIds.length === 0) return [];
+
+  const uniqueIds = [...new Set(steamIds)];
+  const batches = chunk(uniqueIds, PLAYER_SUMMARIES_BATCH_SIZE);
+  const results = await Promise.all(
+    batches.map((batch) => fetchPlayerSummariesBatch(batch))
+  );
+  return results.flat();
 }
 
 export async function getFriendList(steamId: string): Promise<FriendEntry[]> {

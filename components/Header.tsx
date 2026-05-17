@@ -2,7 +2,7 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { signOut, useSession } from "next-auth/react";
-import { formatPersonLabel } from "@/lib/display/person-label";
+import { PersonLabel } from "@/components/PersonLabel";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -80,12 +80,11 @@ export function Header({
                 className="h-8 w-8 rounded"
               />
             )}
-            <span className="text-sm">
-              {formatPersonLabel(
-                session.user.name ?? session.user.steamId,
-                session.user.steamId
-              )}
-            </span>
+            <PersonLabel
+              name={session.user.name ?? session.user.steamId}
+              steamId={session.user.steamId}
+              className="text-sm"
+            />
             <button
               type="button"
               onClick={() => signOut()}

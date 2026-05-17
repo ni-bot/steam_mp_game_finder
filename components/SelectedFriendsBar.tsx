@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { formatPersonLabel } from "@/lib/display/person-label";
+import { PersonLabel } from "@/components/PersonLabel";
 import type { FriendOption } from "@/components/FriendPicker";
 
 interface SelectedFriendsBarProps {
@@ -65,7 +65,7 @@ export function SelectedFriendsBar({
                 <span className="h-5 w-5 rounded-full bg-[var(--steam-bg)]" />
               )}
               <span className="truncate">
-                {formatPersonLabel(friend.personaname, friend.steamid)}
+                <PersonLabel name={friend.personaname} steamId={friend.steamid} />
               </span>
               <span className="text-[var(--steam-muted)]" aria-hidden>
                 ×

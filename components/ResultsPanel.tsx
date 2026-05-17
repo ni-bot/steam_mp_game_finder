@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { GameCard } from "@/components/GameCard";
 import { FriendStatusBadge } from "@/components/FriendStatusBadge";
-import { formatPersonLabel } from "@/lib/display/person-label";
+import { PersonLabel } from "@/components/PersonLabel";
 import type { CompareResponse, MatchMode, SortMode } from "@/lib/steam/types";
 
 interface ResultsPanelProps {
@@ -37,7 +37,7 @@ function ParticipantChip({
         // eslint-disable-next-line @next/next/no-img-element
         <img src={p.avatarUrl} alt="" className="h-6 w-6 rounded" />
       )}
-      <span>{formatPersonLabel(p.displayName, p.steamId)}</span>
+      <PersonLabel name={p.displayName} steamId={p.steamId} />
       <FriendStatusBadge status={p.status} />
       {p.lastUpdated && (
         <span className="text-xs text-[var(--steam-muted)]">
@@ -201,7 +201,7 @@ export function ResultsPanel({
                 .filter((p) => p.status === "ok")
                 .map((p) => ({
                   steamId: p.steamId,
-                  displayName: formatPersonLabel(p.displayName, p.steamId),
+                  name: p.displayName,
                 }))}
             />
           ))}

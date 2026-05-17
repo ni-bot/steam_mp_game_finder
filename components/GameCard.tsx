@@ -1,11 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { PersonLabel } from "@/components/PersonLabel";
 import type { CompareGameResult } from "@/lib/steam/types";
 
 interface GameCardProps {
   game: CompareGameResult;
-  participants: { steamId: string; displayName: string }[];
+  participants: { steamId: string; name: string }[];
 }
 
 function formatPlaytime(minutes: number, t: ReturnType<typeof useTranslations>) {
@@ -60,7 +61,11 @@ export function GameCard({ game, participants }: GameCardProps) {
                     : "flex justify-between gap-4"
                 }
               >
-                <span className="truncate">{p.displayName}</span>
+                <PersonLabel
+                  name={p.name}
+                  steamId={p.steamId}
+                  className="truncate"
+                />
                 <span className="shrink-0">
                   {doesNotOwn
                     ? t("doesNotOwn")
