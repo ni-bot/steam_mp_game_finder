@@ -11,8 +11,9 @@
   },
   "theme": {
     "menuLabel": "Design",
-    "steamStore": "Steam Store",
-    "steamClient": "Steam Client"
+    "harbor": "Hafen",
+    "grove": "Hain",
+    "lightMode": "Hellmodus"
   },
   "friends": {
     "title": "Freunde auswählen",

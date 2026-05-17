@@ -16,7 +16,7 @@ interface UserMenuProps {
 export function UserMenu({ name, steamId, image }: UserMenuProps) {
   const tNav = useTranslations("nav");
   const tTheme = useTranslations("theme");
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, lightMode, setLightMode } = useTheme();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -42,8 +42,8 @@ export function UserMenu({ name, steamId, image }: UserMenuProps) {
   }, [open]);
 
   const themeLabel: Record<ThemeId, string> = {
-    "steam-store": tTheme("steamStore"),
-    "steam-client": tTheme("steamClient"),
+    harbor: tTheme("harbor"),
+    grove: tTheme("grove"),
   };
 
   return (
@@ -102,6 +102,27 @@ export function UserMenu({ name, steamId, image }: UserMenuProps) {
               {themeLabel[id]}
             </button>
           ))}
+          <div className="flex items-center justify-between gap-3 px-3 py-2">
+            <span className="text-sm">{tTheme("lightMode")}</span>
+            <label className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer">
+              <input
+                type="checkbox"
+                role="switch"
+                aria-checked={lightMode}
+                checked={lightMode}
+                onChange={(e) => setLightMode(e.target.checked)}
+                className="peer sr-only"
+              />
+              <span
+                className="absolute inset-0 rounded-full border border-[var(--steam-border)] bg-[var(--steam-panel)] transition-colors peer-checked:border-[var(--steam-accent)] peer-checked:bg-[var(--steam-accent)]/25 peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--steam-accent)] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[var(--steam-bg-dark)]"
+                aria-hidden
+              />
+              <span
+                className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-[var(--steam-toggle-off)] shadow transition-transform peer-checked:translate-x-5 peer-checked:bg-[var(--steam-accent)]"
+                aria-hidden
+              />
+            </label>
+          </div>
           <div
             className="my-1 border-t border-[var(--steam-border)]"
             role="separator"

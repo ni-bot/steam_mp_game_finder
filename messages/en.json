@@ -11,8 +11,9 @@
   },
   "theme": {
     "menuLabel": "Theme",
-    "steamStore": "Steam Store",
-    "steamClient": "Steam Client"
+    "harbor": "Harbor",
+    "grove": "Grove",
+    "lightMode": "Light mode"
   },
   "friends": {
     "title": "Select friends",

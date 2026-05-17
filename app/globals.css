@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
-/* Steam Store (default) — matches store.steampowered.com */
+/* Harbor — cool blue-gray (default) */
 :root,
-[data-theme="steam-store"] {
+[data-theme="harbor"] {
   --steam-bg: #1b2838;
   --steam-bg-dark: #171a21;
   --steam-panel: #2a475e;
@@ -17,8 +17,8 @@
   --steam-toggle-off: #8f98a0;
 }
 
-/* Steam Client — darker library UI */
-[data-theme="steam-client"] {
+/* Grove — charcoal with green accent */
+[data-theme="grove"] {
   --steam-bg: #181818;
   --steam-bg-dark: #101010;
   --steam-panel: #2e2e2e;
@@ -30,6 +30,38 @@
   --steam-text: #dcdedf;
   --steam-btn-primary: #5ba32a;
   --steam-btn-primary-hover: #6bb82f;
+  --steam-toggle-off: #9b9b9b;
+}
+
+/* Light mode — Harbor */
+[data-theme="harbor"][data-light="true"] {
+  --steam-bg: #e3e8ef;
+  --steam-bg-dark: #f5f7fa;
+  --steam-panel: #c8d4e0;
+  --steam-accent: #1a7fc9;
+  --steam-muted: #5c6e7e;
+  --steam-id: #8a96a3;
+  --steam-border: #a8b8c8;
+  --steam-hover: #d4dde8;
+  --steam-text: #1b2838;
+  --steam-btn-primary: #5c7e10;
+  --steam-btn-primary-hover: #6a8f12;
+  --steam-toggle-off: #8f98a0;
+}
+
+/* Light mode — Grove */
+[data-theme="grove"][data-light="true"] {
+  --steam-bg: #ececec;
+  --steam-bg-dark: #f8f8f8;
+  --steam-panel: #d8d8d8;
+  --steam-accent: #4a8f24;
+  --steam-muted: #666666;
+  --steam-id: #888888;
+  --steam-border: #c0c0c0;
+  --steam-hover: #e0e0e0;
+  --steam-text: #1a1a1a;
+  --steam-btn-primary: #4a8f24;
+  --steam-btn-primary-hover: #5ba32a;
   --steam-toggle-off: #9b9b9b;
 }
 
