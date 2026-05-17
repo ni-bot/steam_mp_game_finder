@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
-:root {
+/* Steam Store (default) — matches store.steampowered.com */
+:root,
+[data-theme="steam-store"] {
   --steam-bg: #1b2838;
   --steam-bg-dark: #171a21;
   --steam-panel: #2a475e;
@@ -9,11 +11,31 @@
   --steam-id: #4a5560;
   --steam-border: #3d5a73;
   --steam-hover: #1f3a52;
+  --steam-text: #c7d5e0;
+  --steam-btn-primary: #5c7e10;
+  --steam-btn-primary-hover: #6a8f12;
+  --steam-toggle-off: #8f98a0;
+}
+
+/* Steam Client — darker library UI */
+[data-theme="steam-client"] {
+  --steam-bg: #181818;
+  --steam-bg-dark: #101010;
+  --steam-panel: #2e2e2e;
+  --steam-accent: #5ba32a;
+  --steam-muted: #9b9b9b;
+  --steam-id: #6a6a6a;
+  --steam-border: #404040;
+  --steam-hover: #262626;
+  --steam-text: #dcdedf;
+  --steam-btn-primary: #5ba32a;
+  --steam-btn-primary-hover: #6bb82f;
+  --steam-toggle-off: #9b9b9b;
 }
 
 body {
   background: var(--steam-bg);
-  color: #c7d5e0;
+  color: var(--steam-text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 

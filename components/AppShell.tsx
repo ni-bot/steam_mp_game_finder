@@ -142,7 +142,7 @@ export function AppShell() {
             onClick={() => {
               window.location.href = "/api/auth/steam";
             }}
-            className="rounded bg-[#5c7e10] px-6 py-3 font-medium text-white hover:bg-[#6a8f12] transition-colors"
+            className="rounded bg-[var(--steam-btn-primary)] px-6 py-3 font-medium text-white transition-colors hover:bg-[var(--steam-btn-primary-hover)]"
           >
             {tNav("signIn")}
           </button>

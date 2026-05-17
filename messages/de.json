@@ -9,6 +9,11 @@
     "language": "Sprache",
     "refresh": "Aktualisieren"
   },
+  "theme": {
+    "menuLabel": "Design",
+    "steamStore": "Steam Store",
+    "steamClient": "Steam Client"
+  },
   "friends": {
     "title": "Freunde auswählen",
     "search": "Freunde suchen…",
@@ -48,9 +53,9 @@
     "playtimeMinutes": "{minutes} Min.",
     "neverPlayed": "Nie gespielt",
     "doesNotOwn": "Besitzt nicht",
-    "matchStrict": "Alle müssen besitzen",
-    "matchNear": "Nur n-1 müssen besitzen",
-    "matchNearHint": "Im n-1-Modus ist auf jeder Karte markiert, wer das Spiel nicht besitzt. Der Vergleich kann länger dauern.",
+    "matchStrict": "Spiele die alle haben",
+    "matchNear": "Einer muss was kaufen",
+    "matchNearHint": "Auf jeder Karte istmarkiert, wer das Spiel nicht besitzt. Der Vergleich kann länger dauern.",
     "combined": "Gesamt",
     "lastUpdated": "Aktualisiert: {time}",
     "storeLink": "Steam Store",

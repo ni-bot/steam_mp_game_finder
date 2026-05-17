@@ -9,6 +9,11 @@
     "language": "Language",
     "refresh": "Refresh"
   },
+  "theme": {
+    "menuLabel": "Theme",
+    "steamStore": "Steam Store",
+    "steamClient": "Steam Client"
+  },
   "friends": {
     "title": "Select friends",
     "search": "Search friends…",

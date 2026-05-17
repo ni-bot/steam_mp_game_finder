@@ -78,7 +78,7 @@ export function SelectedFriendsBar({
           type="button"
           onClick={resetAll}
           disabled={selected.size === 0}
-          className="shrink-0 rounded px-2.5 py-1 text-xs text-[var(--steam-muted)] hover:bg-[var(--steam-hover)] hover:text-[#c7d5e0] disabled:cursor-not-allowed disabled:opacity-40 transition-colors"
+          className="shrink-0 rounded px-2.5 py-1 text-xs text-[var(--steam-muted)] hover:bg-[var(--steam-hover)] hover:text-[var(--steam-text)] disabled:cursor-not-allowed disabled:opacity-40 transition-colors"
         >
           {t("resetSelection")}
         </button>

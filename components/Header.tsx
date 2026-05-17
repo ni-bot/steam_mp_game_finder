@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { signOut, useSession } from "next-auth/react";
-import { PersonLabel } from "@/components/PersonLabel";
+import { useSession } from "next-auth/react";
+import { UserMenu } from "@/components/UserMenu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -46,7 +46,7 @@ export function Header({
           type="button"
           onClick={onCompare}
           disabled={compareDisabled || compareLoading}
-          className="justify-self-center rounded bg-[#5c7e10] px-8 py-2.5 text-sm font-medium text-white hover:bg-[#6a8f12] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+          className="justify-self-center rounded bg-[var(--steam-btn-primary)] px-8 py-2.5 text-sm font-medium text-white hover:bg-[var(--steam-btn-primary-hover)] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
         >
           {compareLoading ? "…" : tFriends("compare")}
         </button>
@@ -71,35 +71,18 @@ export function Header({
         </Link>
 
         {session?.user ? (
-          <div className="flex items-center gap-3">
-            {session.user.image && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={session.user.image}
-                alt=""
-                className="h-8 w-8 rounded"
-              />
-            )}
-            <PersonLabel
-              name={session.user.name ?? session.user.steamId}
-              steamId={session.user.steamId}
-              className="text-sm"
-            />
-            <button
-              type="button"
-              onClick={() => signOut()}
-              className="rounded px-3 py-1.5 text-sm bg-[var(--steam-panel)] hover:bg-[var(--steam-hover)]"
-            >
-              {t("nav.signOut")}
-            </button>
-          </div>
+          <UserMenu
+            name={session.user.name ?? session.user.steamId}
+            steamId={session.user.steamId}
+            image={session.user.image}
+          />
         ) : (
           <button
             type="button"
             onClick={() => {
               window.location.href = "/api/auth/steam";
             }}
-            className="rounded bg-[#5c7e10] hover:bg-[#6a8f12] px-4 py-2 text-sm font-medium text-white transition-colors"
+            className="rounded bg-[var(--steam-btn-primary)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--steam-btn-primary-hover)]"
           >
             {t("nav.signIn")}
           </button>

@@ -84,7 +84,7 @@ export function ResultsPanel({
           <span
             className={
               matchMode === "strict"
-                ? "text-[#c7d5e0]"
+                ? "text-[var(--steam-text)]"
                 : "text-[var(--steam-muted)]"
             }
           >
@@ -106,14 +106,14 @@ export function ResultsPanel({
               aria-hidden
             />
             <span
-              className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-[#8f98a0] shadow transition-transform peer-checked:translate-x-5 peer-checked:bg-[var(--steam-accent)]"
+              className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-[var(--steam-toggle-off)] shadow transition-transform peer-checked:translate-x-5 peer-checked:bg-[var(--steam-accent)]"
               aria-hidden
             />
           </label>
           <span
             className={
               matchMode === "near"
-                ? "text-[#c7d5e0]"
+                ? "text-[var(--steam-text)]"
                 : "text-[var(--steam-muted)]"
             }
           >
@@ -126,7 +126,7 @@ export function ResultsPanel({
           <select
             value={sort}
             onChange={(e) => onSortChange(e.target.value as SortMode)}
-            className="rounded border border-[var(--steam-border)] bg-[var(--steam-bg-dark)] px-2 py-1 text-[#c7d5e0]"
+            className="rounded border border-[var(--steam-border)] bg-[var(--steam-bg-dark)] px-2 py-1 text-[var(--steam-text)]"
           >
             <option value="low_playtime">{t("sortLowPlaytime")}</option>
             <option value="high_playtime">{t("sortHighPlaytime")}</option>
