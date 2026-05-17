@@ -84,8 +84,13 @@
     "emptyBuyerFilter": "{name} müsste bei keinem der nahen Treffer etwas kaufen.",
     "combined": "Gesamt",
     "lastUpdated": "Aktualisiert: {time}",
-    "storeLink": "Steam Store",
+    "openStore": "Store-Infos anzeigen",
     "privateLibraries": "Bibliothek nicht sichtbar",
+    "storeModal": {
+      "close": "Schließen",
+      "openInStore": "Im Steam Store öffnen",
+      "widgetLoadError": "Store-Widget konnte nicht geladen werden."
+    },
     "tagFilterHeading": "Kategorien",
     "emptyTagFilter": "Keine Spiele mit den gewählten Kategorien."
   },

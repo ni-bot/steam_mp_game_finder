@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { GameCard } from "@/components/GameCard";
+import { GameStoreModal } from "@/components/GameStoreModal";
 import { FriendStatusBadge } from "@/components/FriendStatusBadge";
 import { PersonLabel } from "@/components/PersonLabel";
 import { filterGamesByBuyer } from "@/lib/compare/filter-by-buyer";
@@ -11,7 +12,12 @@ import {
   filterGamesByTags,
 } from "@/lib/compare/filter-by-tags";
 import { MultiplayerTag } from "@/components/MultiplayerTag";
-import type { CompareResponse, MatchMode, SortMode } from "@/lib/steam/types";
+import type {
+  CompareGameResult,
+  CompareResponse,
+  MatchMode,
+  SortMode,
+} from "@/lib/steam/types";
 
 interface ResultsPanelProps {
   result: CompareResponse | null;
@@ -77,6 +83,8 @@ export function ResultsPanel({
 }: ResultsPanelProps) {
   const t = useTranslations("results");
   const locale = useLocale();
+  const [storeModalGame, setStoreModalGame] =
+    useState<CompareGameResult | null>(null);
 
   const okParticipants = useMemo(
     () => result?.participants.filter((p) => p.status === "ok") ?? [],
@@ -318,11 +326,17 @@ export function ResultsPanel({
                   steamId: p.steamId,
                   name: p.displayName,
                 }))}
+                onOpenStore={() => setStoreModalGame(game)}
               />
             ))}
           </div>
         )}
       </div>
+
+      <GameStoreModal
+        game={storeModalGame}
+        onClose={() => setStoreModalGame(null)}
+      />
     </main>
   );
 }

@@ -84,8 +84,13 @@
     "emptyBuyerFilter": "{name} wouldn't need to buy any of these near matches.",
     "combined": "Combined",
     "lastUpdated": "Updated: {time}",
-    "storeLink": "Steam Store",
+    "openStore": "Show store info",
     "privateLibraries": "Library not visible",
+    "storeModal": {
+      "close": "Close",
+      "openInStore": "Open in Steam Store",
+      "widgetLoadError": "Could not load the store widget."
+    },
     "tagFilterHeading": "Categories",
     "emptyTagFilter": "No games match the selected categories."
   },

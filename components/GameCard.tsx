@@ -8,6 +8,7 @@ import type { CompareGameResult } from "@/lib/steam/types";
 interface GameCardProps {
   game: CompareGameResult;
   participants: { steamId: string; name: string }[];
+  onOpenStore: () => void;
 }
 
 function formatPlaytime(minutes: number, t: ReturnType<typeof useTranslations>) {
@@ -16,11 +17,16 @@ function formatPlaytime(minutes: number, t: ReturnType<typeof useTranslations>) 
   return t("playtime", { hours: Math.round(minutes / 60) });
 }
 
-export function GameCard({ game, participants }: GameCardProps) {
+export function GameCard({ game, participants, onOpenStore }: GameCardProps) {
   const t = useTranslations("results");
 
   return (
-    <article className="flex gap-4 rounded border border-[var(--steam-border)] bg-[var(--steam-bg-dark)] p-4 hover:border-[var(--steam-accent)] transition-colors">
+    <button
+      type="button"
+      onClick={onOpenStore}
+      aria-label={`${game.name} — ${t("openStore")}`}
+      className="flex w-full cursor-pointer gap-4 rounded border border-[var(--steam-border)] bg-[var(--steam-bg-dark)] p-4 text-left transition-colors hover:border-[var(--steam-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--steam-accent)]"
+    >
       {game.headerImage ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -35,7 +41,9 @@ export function GameCard({ game, participants }: GameCardProps) {
       )}
 
       <div className="min-w-0 flex-1">
-        <h3 className="truncate text-lg font-medium text-white">{game.name}</h3>
+        <span className="block truncate text-lg font-medium text-white">
+          {game.name}
+        </span>
 
         {game.multiplayerTags.length > 0 && (
           <div className="mt-1 flex flex-wrap gap-1">
@@ -75,16 +83,7 @@ export function GameCard({ game, participants }: GameCardProps) {
             <span>{formatPlaytime(game.combinedPlaytime, t)}</span>
           </div>
         </div>
-
-        <a
-          href={game.storeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-2 inline-block text-sm text-[var(--steam-accent)] hover:underline"
-        >
-          {t("storeLink")} →
-        </a>
       </div>
-    </article>
+    </button>
   );
 }
