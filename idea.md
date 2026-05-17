@@ -1,0 +1,3 @@
+Ich möchte eine Web-App, mit der ich von einem öffentlichen Steamprofil alle Spiele, die ich besitze, Mit denen meiner Freunde vergleiche, um herauszufinden welche Spiele wir gemeinsam spielen können da wir sie alle gleich besitzen. Hierbei soll besonders auf Mehrspieler Spiele Wert gelegt werden.
+Ich möchte auswählen können mit welchen Freunden ich dpielen möchte, außerdem sollen mehrere Freunde gleichzeitig auswählbar sein.
+Das Design der Weboberfläche soll an die Steam Seite angelehnt sein.

@@ -1,0 +1,57 @@
+{
+  "app": {
+    "title": "Steam MP Game Finder",
+    "tagline": "Find multiplayer games you all own."
+  },
+  "nav": {
+    "signIn": "Sign in with Steam",
+    "signOut": "Sign out",
+    "language": "Language",
+    "refresh": "Refresh"
+  },
+  "friends": {
+    "title": "Select friends",
+    "search": "Search friends…",
+    "compare": "Compare",
+    "manualLabel": "Add profile URL",
+    "manualPlaceholder": "https://steamcommunity.com/id/…",
+    "add": "Add",
+    "minOne": "Select at least one friend.",
+    "manyWarning": "Many friends selected — comparison may take a while.",
+    "privacyHint": "Game libraries must be public (Profile → Edit → Game details: Public).",
+    "noFriends": "No friends loaded. Add profiles via URL.",
+    "selected": "{count} selected"
+  },
+  "status": {
+    "ok": "Library loaded",
+    "private": "Library not visible",
+    "error": "Failed to load"
+  },
+  "results": {
+    "title": "Shared games",
+    "multiplayerOnly": "Multiplayer only",
+    "showAll": "Show all shared games",
+    "empty": "No matching games found.",
+    "emptyHint": "Adjust filters or check library visibility settings.",
+    "sort": "Sort by",
+    "sortLowPlaytime": "Lowest combined playtime",
+    "sortHighPlaytime": "Highest combined playtime",
+    "sortAlpha": "Alphabetical",
+    "sortRecent": "Recently played",
+    "playtime": "{hours}h",
+    "playtimeMinutes": "{minutes} min",
+    "neverPlayed": "Never played",
+    "combined": "Combined",
+    "lastUpdated": "Updated: {time}",
+    "storeLink": "Steam Store"
+  },
+  "landing": {
+    "signInPrompt": "Sign in with Steam to load your friend list and find shared multiplayer games."
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "unauthorized": "Please sign in.",
+    "invalidUrl": "Invalid Steam profile URL.",
+    "resolveFailed": "Could not resolve profile."
+  }
+}

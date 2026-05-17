@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+:root {
+  --steam-bg: #1b2838;
+  --steam-bg-dark: #171a21;
+  --steam-panel: #2a475e;
+  --steam-accent: #66c0f4;
+  --steam-muted: #8f98a0;
+  --steam-border: #3d5a73;
+  --steam-hover: #1f3a52;
+}
+
+body {
+  background: var(--steam-bg);
+  color: #c7d5e0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}

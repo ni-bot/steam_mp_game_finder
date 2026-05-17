@@ -1,0 +1,57 @@
+{
+  "app": {
+    "title": "Steam MP Game Finder",
+    "tagline": "Finde Mehrspieler-Spiele, die ihr alle besitzt."
+  },
+  "nav": {
+    "signIn": "Mit Steam anmelden",
+    "signOut": "Abmelden",
+    "language": "Sprache",
+    "refresh": "Aktualisieren"
+  },
+  "friends": {
+    "title": "Freunde auswählen",
+    "search": "Freunde suchen…",
+    "compare": "Vergleichen",
+    "manualLabel": "Profil-URL hinzufügen",
+    "manualPlaceholder": "https://steamcommunity.com/id/…",
+    "add": "Hinzufügen",
+    "minOne": "Wähle mindestens einen Freund aus.",
+    "manyWarning": "Viele Freunde ausgewählt — der Vergleich kann etwas dauern.",
+    "privacyHint": "Spielbibliotheken müssen öffentlich sein (Profil → Bearbeiten → Spieldetails: Öffentlich).",
+    "noFriends": "Keine Freunde geladen. Füge Profile per URL hinzu.",
+    "selected": "{count} ausgewählt"
+  },
+  "status": {
+    "ok": "Bibliothek geladen",
+    "private": "Bibliothek nicht sichtbar",
+    "error": "Fehler beim Laden"
+  },
+  "results": {
+    "title": "Gemeinsame Spiele",
+    "multiplayerOnly": "Nur Mehrspieler",
+    "showAll": "Alle gemeinsamen Spiele anzeigen",
+    "empty": "Keine passenden Spiele gefunden.",
+    "emptyHint": "Passe die Filter an oder prüfe die Sichtbarkeit der Bibliotheken.",
+    "sort": "Sortierung",
+    "sortLowPlaytime": "Niedrigste Gesamtspielzeit",
+    "sortHighPlaytime": "Höchste Gesamtspielzeit",
+    "sortAlpha": "Alphabetisch",
+    "sortRecent": "Zuletzt gespielt",
+    "playtime": "{hours}h",
+    "playtimeMinutes": "{minutes} Min.",
+    "neverPlayed": "Nie gespielt",
+    "combined": "Gesamt",
+    "lastUpdated": "Aktualisiert: {time}",
+    "storeLink": "Steam Store"
+  },
+  "landing": {
+    "signInPrompt": "Melde dich mit Steam an, um deine Freundesliste zu laden und gemeinsame Mehrspieler-Spiele zu finden."
+  },
+  "errors": {
+    "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "unauthorized": "Bitte melde dich an.",
+    "invalidUrl": "Ungültige Steam-Profil-URL.",
+    "resolveFailed": "Profil konnte nicht aufgelöst werden."
+  }
+}
