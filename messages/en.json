@@ -63,7 +63,9 @@
     "combined": "Combined",
     "lastUpdated": "Updated: {time}",
     "storeLink": "Steam Store",
-    "privateLibraries": "Library not visible"
+    "privateLibraries": "Library not visible",
+    "tagFilterHeading": "Categories",
+    "emptyTagFilter": "No games match the selected categories."
   },
   "landing": {
     "signInPrompt": "Sign in with Steam to load your friend list and find shared multiplayer games."

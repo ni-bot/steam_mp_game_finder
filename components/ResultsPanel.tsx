@@ -6,6 +6,11 @@ import { GameCard } from "@/components/GameCard";
 import { FriendStatusBadge } from "@/components/FriendStatusBadge";
 import { PersonLabel } from "@/components/PersonLabel";
 import { filterGamesByBuyer } from "@/lib/compare/filter-by-buyer";
+import {
+  collectMultiplayerTags,
+  filterGamesByTags,
+} from "@/lib/compare/filter-by-tags";
+import { MultiplayerTag } from "@/components/MultiplayerTag";
 import type { CompareResponse, MatchMode, SortMode } from "@/lib/steam/types";
 
 interface ResultsPanelProps {
@@ -18,6 +23,8 @@ interface ResultsPanelProps {
   onBuyerFilterChange: (steamId: string | null) => void;
   sort: SortMode;
   onSortChange: (value: SortMode) => void;
+  selectedTags: Set<string>;
+  onSelectedTagsChange: (tags: Set<string>) => void;
   loading?: boolean;
 }
 
@@ -64,6 +71,8 @@ export function ResultsPanel({
   onBuyerFilterChange,
   sort,
   onSortChange,
+  selectedTags,
+  onSelectedTagsChange,
   loading,
 }: ResultsPanelProps) {
   const t = useTranslations("results");
@@ -74,11 +83,32 @@ export function ResultsPanel({
     [result?.participants]
   );
 
-  const displayGames = useMemo(() => {
+  const gamesBeforeTagFilter = useMemo(() => {
     if (!result) return [];
     if (matchMode !== "near") return result.games;
     return filterGamesByBuyer(result.games, buyerFilterSteamId);
   }, [result, matchMode, buyerFilterSteamId]);
+
+  const availableTags = useMemo(
+    () => collectMultiplayerTags(gamesBeforeTagFilter, locale),
+    [gamesBeforeTagFilter, locale]
+  );
+
+  const displayGames = useMemo(
+    () => filterGamesByTags(gamesBeforeTagFilter, selectedTags),
+    [gamesBeforeTagFilter, selectedTags]
+  );
+
+  const toggleTag = (tag: string) => {
+    onSelectedTagsChange(
+      (() => {
+        const next = new Set(selectedTags);
+        if (next.has(tag)) next.delete(tag);
+        else next.add(tag);
+        return next;
+      })()
+    );
+  };
 
   const buyerFilterName = useMemo(() => {
     if (!buyerFilterSteamId) return null;
@@ -224,6 +254,25 @@ export function ResultsPanel({
         </div>
       )}
 
+      {!loading && result && availableTags.length > 0 && (
+        <section className="mb-4 shrink-0">
+          <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-[var(--steam-muted)]">
+            {t("tagFilterHeading")}
+          </h3>
+          <div className="flex flex-wrap gap-1">
+            {availableTags.map((tag) => (
+              <MultiplayerTag
+                key={tag}
+                as="button"
+                label={tag}
+                active={selectedTags.has(tag)}
+                onToggle={() => toggleTag(tag)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
       <div className="min-h-0 flex-1 overflow-y-auto">
         {loading && (
           <p className="text-[var(--steam-muted)]">Loading…</p>
@@ -239,12 +288,23 @@ export function ResultsPanel({
         {!loading &&
           result &&
           result.games.length > 0 &&
-          displayGames.length === 0 &&
+          gamesBeforeTagFilter.length === 0 &&
           buyerFilterName && (
             <div className="rounded border border-[var(--steam-border)] bg-[var(--steam-bg-dark)] p-8 text-center">
               <p className="text-lg">
                 {t("emptyBuyerFilter", { name: buyerFilterName })}
               </p>
+            </div>
+          )}
+
+        {!loading &&
+          result &&
+          result.games.length > 0 &&
+          gamesBeforeTagFilter.length > 0 &&
+          displayGames.length === 0 &&
+          selectedTags.size > 0 && (
+            <div className="rounded border border-[var(--steam-border)] bg-[var(--steam-bg-dark)] p-8 text-center">
+              <p className="text-lg">{t("emptyTagFilter")}</p>
             </div>
           )}
 

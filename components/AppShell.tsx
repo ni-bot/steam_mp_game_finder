@@ -33,6 +33,7 @@ export function AppShell() {
     null
   );
   const [sort, setSort] = useState<SortMode>("low_playtime");
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [loadingCompare, setLoadingCompare] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +77,7 @@ export function AppShell() {
         }
 
         const compare = data as CompareResponse;
+        setSelectedTags(new Set());
         setResult({
           ...compare,
           games: sortGames(compare.games, sort),
@@ -191,6 +193,8 @@ export function AppShell() {
               onBuyerFilterChange={setBuyerFilterSteamId}
               sort={sort}
               onSortChange={handleSortChange}
+              selectedTags={selectedTags}
+              onSelectedTagsChange={setSelectedTags}
               loading={loadingCompare}
             />
           </div>

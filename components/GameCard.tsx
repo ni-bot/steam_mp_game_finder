@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { MultiplayerTag } from "@/components/MultiplayerTag";
 import { PersonLabel } from "@/components/PersonLabel";
 import type { CompareGameResult } from "@/lib/steam/types";
 
@@ -39,12 +40,7 @@ export function GameCard({ game, participants }: GameCardProps) {
         {game.multiplayerTags.length > 0 && (
           <div className="mt-1 flex flex-wrap gap-1">
             {game.multiplayerTags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded bg-[var(--steam-panel)] px-2 py-0.5 text-xs text-[var(--steam-accent)]"
-              >
-                {tag}
-              </span>
+              <MultiplayerTag key={tag} label={tag} />
             ))}
           </div>
         )}

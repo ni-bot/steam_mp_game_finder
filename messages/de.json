@@ -63,7 +63,9 @@
     "combined": "Gesamt",
     "lastUpdated": "Aktualisiert: {time}",
     "storeLink": "Steam Store",
-    "privateLibraries": "Bibliothek nicht sichtbar"
+    "privateLibraries": "Bibliothek nicht sichtbar",
+    "tagFilterHeading": "Kategorien",
+    "emptyTagFilter": "Keine Spiele mit den gewählten Kategorien."
   },
   "landing": {
     "signInPrompt": "Melde dich mit Steam an, um deine Freundesliste zu laden und gemeinsame Mehrspieler-Spiele zu finden."
