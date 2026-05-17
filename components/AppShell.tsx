@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Header } from "@/components/Header";
 import { FriendPicker, type FriendOption } from "@/components/FriendPicker";
 import { ResultsPanel } from "@/components/ResultsPanel";
-import type { CompareResponse, SortMode } from "@/lib/steam/types";
+import type { CompareResponse, MatchMode, SortMode } from "@/lib/steam/types";
 
 export function AppShell() {
   const { data: session, status } = useSession();
@@ -18,6 +18,7 @@ export function AppShell() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [result, setResult] = useState<CompareResponse | null>(null);
   const [multiplayerOnly, setMultiplayerOnly] = useState(true);
+  const [matchMode, setMatchMode] = useState<MatchMode>("strict");
   const [sort, setSort] = useState<SortMode>("low_playtime");
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [loadingCompare, setLoadingCompare] = useState(false);
@@ -50,6 +51,7 @@ export function AppShell() {
           body: JSON.stringify({
             friendSteamIds: [...selected],
             multiplayerOnly,
+            matchMode,
             sort,
             skipCache,
           }),
@@ -68,7 +70,7 @@ export function AppShell() {
         setLoadingCompare(false);
       }
     },
-    [selected, multiplayerOnly, sort, tErrors]
+    [selected, multiplayerOnly, matchMode, sort, tErrors]
   );
 
   const handleRefresh = useCallback(async () => {
@@ -89,7 +91,7 @@ export function AppShell() {
     if (!result || selected.size < 1) return;
     runCompare(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [multiplayerOnly, sort]);
+  }, [multiplayerOnly, matchMode, sort]);
 
   if (status === "loading") {
     return (
@@ -144,6 +146,8 @@ export function AppShell() {
               result={result}
               multiplayerOnly={multiplayerOnly}
               onMultiplayerOnlyChange={setMultiplayerOnly}
+              matchMode={matchMode}
+              onMatchModeChange={setMatchMode}
               sort={sort}
               onSortChange={setSort}
               loading={loadingCompare}

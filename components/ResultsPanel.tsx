@@ -3,12 +3,14 @@
 import { useLocale, useTranslations } from "next-intl";
 import { GameCard } from "@/components/GameCard";
 import { FriendStatusBadge } from "@/components/FriendStatusBadge";
-import type { CompareResponse, SortMode } from "@/lib/steam/types";
+import type { CompareResponse, MatchMode, SortMode } from "@/lib/steam/types";
 
 interface ResultsPanelProps {
   result: CompareResponse | null;
   multiplayerOnly: boolean;
   onMultiplayerOnlyChange: (value: boolean) => void;
+  matchMode: MatchMode;
+  onMatchModeChange: (value: MatchMode) => void;
   sort: SortMode;
   onSortChange: (value: SortMode) => void;
   loading?: boolean;
@@ -23,6 +25,8 @@ export function ResultsPanel({
   result,
   multiplayerOnly,
   onMultiplayerOnlyChange,
+  matchMode,
+  onMatchModeChange,
   sort,
   onSortChange,
   loading,
@@ -47,6 +51,18 @@ export function ResultsPanel({
           {multiplayerOnly ? t("multiplayerOnly") : t("showAll")}
         </label>
 
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={matchMode === "near"}
+            onChange={(e) =>
+              onMatchModeChange(e.target.checked ? "near" : "strict")
+            }
+            className="accent-[var(--steam-accent)]"
+          />
+          {matchMode === "near" ? t("matchNear") : t("matchStrict")}
+        </label>
+
         <label className="flex items-center gap-2 text-sm text-[var(--steam-muted)]">
           {t("sort")}
           <select
@@ -61,6 +77,12 @@ export function ResultsPanel({
           </select>
         </label>
       </div>
+
+      {matchMode === "near" && (
+        <p className="mb-4 text-sm text-[var(--steam-muted)]">
+          {t("matchNearHint")}
+        </p>
+      )}
 
       {result?.participants && result.participants.length > 0 && (
         <div className="mb-4 flex flex-wrap gap-3">

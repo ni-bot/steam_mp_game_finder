@@ -4,6 +4,7 @@ import type {
   CompareGameResult,
   CompareResponse,
   LibraryStatus,
+  MatchMode,
   PersonLibrary,
   SortMode,
 } from "@/lib/steam/types";
@@ -38,6 +39,36 @@ function intersectAppIds(libraries: PersonLibrary[]): Set<number> {
   }
 
   return intersection;
+}
+
+function collectNearSharedAppIds(
+  libraries: PersonLibrary[]
+): Map<number, string[]> {
+  const accessible = libraries.filter((l) => l.status === "ok");
+  const result = new Map<number, string[]>();
+  if (accessible.length === 0) return result;
+
+  const ownerSets = accessible.map((lib) => ({
+    steamId: lib.steamId,
+    ids: new Set(lib.games.map((g) => g.appid)),
+  }));
+
+  const allAppIds = new Set<number>();
+  for (const { ids } of ownerSets) {
+    for (const id of ids) allAppIds.add(id);
+  }
+
+  for (const appId of allAppIds) {
+    const missingOwners: string[] = [];
+    for (const { steamId, ids } of ownerSets) {
+      if (!ids.has(appId)) missingOwners.push(steamId);
+    }
+    if (missingOwners.length <= 1) {
+      result.set(appId, missingOwners);
+    }
+  }
+
+  return result;
 }
 
 function buildPlaytimeMap(
@@ -111,6 +142,7 @@ export async function compareLibraries(options: {
   friendSteamIds: string[];
   multiplayerOnly: boolean;
   sort: SortMode;
+  matchMode?: MatchMode;
   skipCache?: boolean;
 }): Promise<CompareResponse> {
   const allIds = [options.mySteamId, ...options.friendSteamIds];
@@ -134,11 +166,17 @@ export async function compareLibraries(options: {
     return lib?.status !== "ok";
   });
 
-  const intersection = intersectAppIds(libraries);
+  const matchMode = options.matchMode ?? "strict";
+  const nearMap =
+    matchMode === "near" ? collectNearSharedAppIds(libraries) : null;
+  const appIds =
+    matchMode === "near"
+      ? [...(nearMap?.keys() ?? [])]
+      : [...intersectAppIds(libraries)];
+
   const playtimeMap = buildPlaytimeMap(libraries);
   const lastPlayedMap = buildLastPlayedMap(libraries);
 
-  const appIds = [...intersection];
   const metaMap = await getAppDetailsBatch(appIds, 200);
 
   const games: CompareGameResult[] = [];
@@ -153,6 +191,8 @@ export async function compareLibraries(options: {
     const lastPlayed = lastPlayedMap.get(appId) ?? {};
     const combinedPlaytime = Object.values(playtimes).reduce((a, b) => a + b, 0);
     const maxLastPlayed = Math.max(0, ...Object.values(lastPlayed));
+    const missingOwners =
+      matchMode === "near" ? (nearMap?.get(appId) ?? []) : [];
 
     games.push({
       appid: appId,
@@ -163,6 +203,7 @@ export async function compareLibraries(options: {
       playtimes,
       combinedPlaytime,
       maxLastPlayed,
+      missingOwners,
     });
   }
 

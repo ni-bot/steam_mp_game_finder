@@ -56,6 +56,8 @@ export type SortMode =
   | "alpha"
   | "recent";
 
+export type MatchMode = "strict" | "near";
+
 export interface CompareGameResult {
   appid: number;
   name: string;
@@ -65,6 +67,7 @@ export interface CompareGameResult {
   playtimes: Record<string, number>;
   combinedPlaytime: number;
   maxLastPlayed: number;
+  missingOwners: string[];
 }
 
 export interface CompareResponse {

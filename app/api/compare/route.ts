@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { compareLibraries } from "@/lib/compare";
-import type { SortMode } from "@/lib/steam/types";
+import type { MatchMode, SortMode } from "@/lib/steam/types";
 
 export async function POST(request: NextRequest) {
   const session = await auth();
@@ -18,6 +18,8 @@ export async function POST(request: NextRequest) {
 
   const multiplayerOnly = body?.multiplayerOnly !== false;
   const sort = (body?.sort as SortMode) ?? "low_playtime";
+  const matchMode: MatchMode =
+    body?.matchMode === "near" ? "near" : "strict";
   const skipCache = body?.skipCache === true;
 
   const uniqueFriends = [
@@ -39,6 +41,7 @@ export async function POST(request: NextRequest) {
       friendSteamIds: uniqueFriends,
       multiplayerOnly,
       sort,
+      matchMode,
       skipCache,
     });
 

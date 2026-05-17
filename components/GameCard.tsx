@@ -49,14 +49,26 @@ export function GameCard({ game, participants }: GameCardProps) {
         )}
 
         <div className="mt-2 space-y-1 text-sm text-[var(--steam-muted)]">
-          {participants.map((p) => (
-            <div key={p.steamId} className="flex justify-between gap-4">
-              <span className="truncate">{p.displayName}</span>
-              <span className="shrink-0">
-                {formatPlaytime(game.playtimes[p.steamId] ?? 0, t)}
-              </span>
-            </div>
-          ))}
+          {participants.map((p) => {
+            const doesNotOwn = game.missingOwners.includes(p.steamId);
+            return (
+              <div
+                key={p.steamId}
+                className={
+                  doesNotOwn
+                    ? "flex justify-between gap-4 rounded border-l-2 border-amber-500/80 bg-amber-500/10 px-2 py-1 text-amber-200"
+                    : "flex justify-between gap-4"
+                }
+              >
+                <span className="truncate">{p.displayName}</span>
+                <span className="shrink-0">
+                  {doesNotOwn
+                    ? t("doesNotOwn")
+                    : formatPlaytime(game.playtimes[p.steamId] ?? 0, t)}
+                </span>
+              </div>
+            );
+          })}
           <div className="flex justify-between gap-4 border-t border-[var(--steam-border)] pt-1 font-medium text-[var(--steam-accent)]">
             <span>{t("combined")}</span>
             <span>{formatPlaytime(game.combinedPlaytime, t)}</span>

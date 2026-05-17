@@ -7,6 +7,7 @@ Web app to find **multiplayer games you and your Steam friends all own**. Sign i
 - Steam OpenID login
 - Friend list with search + manual profile URL
 - Intersection of owned games (you + selected friends)
+- Toggle: strict match (everyone owns) vs. n-1 match (at most one person missing — missing owner highlighted per card)
 - Multiplayer filter (default on) with toggle for all shared games
 - Playtime per person, sortable results
 - DE/EN UI

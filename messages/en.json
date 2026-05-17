@@ -41,6 +41,10 @@
     "playtime": "{hours}h",
     "playtimeMinutes": "{minutes} min",
     "neverPlayed": "Never played",
+    "doesNotOwn": "Doesn't own",
+    "matchStrict": "Everyone must own",
+    "matchNear": "Only n-1 must own",
+    "matchNearHint": "In n-1 mode, each card marks who doesn't own the game. Comparison may take longer.",
     "combined": "Combined",
     "lastUpdated": "Updated: {time}",
     "storeLink": "Steam Store"
