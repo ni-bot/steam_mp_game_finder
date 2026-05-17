@@ -13,7 +13,25 @@ import {
 import { SelectedFriendsBar } from "@/components/SelectedFriendsBar";
 import { ResultsPanel } from "@/components/ResultsPanel";
 import { sortGames } from "@/lib/compare/sort";
-import type { CompareResponse, MatchMode, SortMode } from "@/lib/steam/types";
+import { consumeSseStream } from "@/lib/sse-parse";
+import type {
+  CompareGameResult,
+  CompareResponse,
+  MatchMode,
+  SortMode,
+} from "@/lib/steam/types";
+
+function mergeGameUpdate(
+  prev: CompareResponse,
+  game: CompareGameResult,
+  sort: SortMode
+): CompareResponse {
+  const games = [...prev.games];
+  const idx = games.findIndex((g) => g.appid === game.appid);
+  if (idx >= 0) games[idx] = game;
+  else games.push(game);
+  return { ...prev, games: sortGames(games, sort) };
+}
 
 export function AppShell() {
   const { data: session, status } = useSession();
@@ -48,136 +66,213 @@ export function AppShell() {
   const [loadingCompare, setLoadingCompare] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const friendsStreamRef = useRef<EventSource | null>(null);
+  const compareAbortRef = useRef<AbortController | null>(null);
+  const friendsStreamGeneration = useRef(0);
+  const friendsLoadDoneRef = useRef<(() => void) | null>(null);
+
+  const connectFriendsStream = useCallback(
+    (options?: { onDone?: () => void }) => {
+      friendsStreamGeneration.current += 1;
+      const generation = friendsStreamGeneration.current;
+
+      friendsStreamRef.current?.close();
+      friendsStreamRef.current = null;
+
+      setLoadingFriends(true);
+      setLoadPhase("friends");
+      setLoadTotal(0);
+      setLoadProgress(0);
+      setLoadCurrentFriend(null);
+      setError(null);
+
+      const es = new EventSource("/api/friends/stream");
+      friendsStreamRef.current = es;
+      let completed = false;
+
+      const finish = () => {
+        if (generation !== friendsStreamGeneration.current) return;
+        options?.onDone?.();
+      };
+
+      es.addEventListener("phase", (e) => {
+        const data = JSON.parse(e.data) as { phase: FriendsLoadPhase };
+        setLoadPhase(data.phase);
+        if (data.phase === "metadata") {
+          setLoadCurrentFriend(null);
+        }
+      });
+
+      es.addEventListener("total", (e) => {
+        const data = JSON.parse(e.data) as { total: number };
+        setLoadTotal(data.total);
+      });
+
+      es.addEventListener("metadata_total", (e) => {
+        const data = JSON.parse(e.data) as { total: number };
+        setLoadTotal(data.total);
+        setLoadProgress(0);
+      });
+
+      es.addEventListener("progress", (e) => {
+        const data = JSON.parse(e.data) as {
+          kind?: string;
+          loaded: number;
+          total: number;
+          steamid?: string;
+          personaname?: string;
+          avatarfull?: string;
+        };
+        setLoadProgress(data.loaded);
+        setLoadTotal(data.total);
+
+        if (data.kind === "metadata" || !data.steamid) {
+          setLoadCurrentFriend(null);
+          return;
+        }
+
+        setLoadCurrentFriend({
+          steamid: data.steamid,
+          personaname: data.personaname ?? data.steamid,
+          avatarfull: data.avatarfull ?? "",
+        });
+      });
+
+      es.addEventListener("done", (e) => {
+        if (generation !== friendsStreamGeneration.current) return;
+        completed = true;
+        const data = JSON.parse(e.data) as { friends: FriendOption[] };
+        setFriends(data.friends ?? []);
+        setLoadingFriends(false);
+        setLoadPhase(null);
+        es.close();
+        friendsStreamRef.current = null;
+        finish();
+      });
+
+      es.addEventListener("failed", () => {
+        if (generation !== friendsStreamGeneration.current) return;
+        completed = true;
+        setError(tErrors("generic"));
+        setLoadingFriends(false);
+        setLoadPhase(null);
+        es.close();
+        friendsStreamRef.current = null;
+        finish();
+      });
+
+      es.onerror = () => {
+        if (generation !== friendsStreamGeneration.current) return;
+        if (completed || friendsStreamRef.current !== es) return;
+        completed = true;
+        setError(tErrors("generic"));
+        setLoadingFriends(false);
+        setLoadPhase(null);
+        es.close();
+        friendsStreamRef.current = null;
+        finish();
+      };
+    },
+    [tErrors]
+  );
 
   useEffect(() => {
     if (status !== "authenticated") return;
 
-    setLoadingFriends(true);
-    setLoadPhase("friends");
-    setLoadTotal(0);
-    setLoadProgress(0);
-    setLoadCurrentFriend(null);
-    setError(null);
-
-    const es = new EventSource("/api/friends/stream");
-    friendsStreamRef.current = es;
-    let completed = false;
-
-    es.addEventListener("phase", (e) => {
-      const data = JSON.parse(e.data) as { phase: FriendsLoadPhase };
-      setLoadPhase(data.phase);
-    });
-
-    es.addEventListener("total", (e) => {
-      const data = JSON.parse(e.data) as { total: number };
-      setLoadTotal(data.total);
-    });
-
-    es.addEventListener("progress", (e) => {
-      const data = JSON.parse(e.data) as {
-        loaded: number;
-        total: number;
-        steamid: string;
-        personaname: string;
-        avatarfull: string;
-      };
-      setLoadProgress(data.loaded);
-      setLoadTotal(data.total);
-      setLoadCurrentFriend({
-        steamid: data.steamid,
-        personaname: data.personaname,
-        avatarfull: data.avatarfull,
-      });
-    });
-
-    es.addEventListener("done", (e) => {
-      completed = true;
-      const data = JSON.parse(e.data) as { friends: FriendOption[] };
-      setFriends(data.friends ?? []);
-      setLoadingFriends(false);
-      setLoadPhase(null);
-      es.close();
-      friendsStreamRef.current = null;
-    });
-
-    es.addEventListener("failed", () => {
-      completed = true;
-      setError(tErrors("generic"));
-      setLoadingFriends(false);
-      setLoadPhase(null);
-      es.close();
-      friendsStreamRef.current = null;
-    });
-
-    es.onerror = () => {
-      if (completed || friendsStreamRef.current !== es) return;
-      completed = true;
-      setError(tErrors("generic"));
-      setLoadingFriends(false);
-      setLoadPhase(null);
-      es.close();
-      friendsStreamRef.current = null;
-    };
-
+    connectFriendsStream();
     return () => {
-      es.close();
+      friendsStreamRef.current?.close();
       friendsStreamRef.current = null;
     };
-  }, [status, tErrors]);
+  }, [status, connectFriendsStream]);
 
   const runCompare = useCallback(
     async (skipCache = false) => {
       if (selected.size < 1) return;
 
+      compareAbortRef.current?.abort();
+      const abort = new AbortController();
+      compareAbortRef.current = abort;
+
       setLoadingCompare(true);
       setError(null);
 
       try {
-        const res = await fetch("/api/compare", {
+        const res = await fetch("/api/compare/stream", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             friendSteamIds: [...selected],
             multiplayerOnly,
             matchMode,
+            sort,
             skipCache,
           }),
+          signal: abort.signal,
         });
 
-        const data = await res.json();
-        if (!res.ok) {
+        if (!res.ok || !res.body) {
           setError(tErrors("generic"));
           return;
         }
 
-        const compare = data as CompareResponse;
-        setSelectedTags(new Set());
-        setResult({
-          ...compare,
-          games: sortGames(compare.games, sort),
+        let gotResult = false;
+
+        await consumeSseStream(res.body, (event, data) => {
+          if (event === "result") {
+            const compare = data as CompareResponse;
+            gotResult = true;
+            setSelectedTags(new Set());
+            setResult({
+              ...compare,
+              games: sortGames(compare.games, sort),
+            });
+          } else if (event === "game_update") {
+            const { game } = data as { game: CompareGameResult };
+            setResult((prev) =>
+              prev ? mergeGameUpdate(prev, game, sort) : prev
+            );
+          } else if (event === "failed") {
+            setError(tErrors("generic"));
+          }
         });
-      } catch {
+
+        if (!gotResult) {
+          setError(tErrors("generic"));
+        }
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
         setError(tErrors("generic"));
       } finally {
-        setLoadingCompare(false);
+        if (compareAbortRef.current === abort) {
+          setLoadingCompare(false);
+          compareAbortRef.current = null;
+        }
       }
     },
     [selected, multiplayerOnly, matchMode, sort, tErrors]
   );
 
   const handleRefresh = useCallback(async () => {
-    const steamIds = session?.user?.steamId
-      ? [session.user.steamId, ...selected]
-      : [...selected];
-
     await fetch("/api/refresh", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ steamIds }),
+      body: JSON.stringify({
+        steamIds: session?.user?.steamId
+          ? [session.user.steamId, ...selected]
+          : [...selected],
+      }),
     });
 
-    await runCompare(true);
-  }, [session?.user?.steamId, selected, runCompare]);
+    await new Promise<void>((resolve) => {
+      friendsLoadDoneRef.current = resolve;
+      connectFriendsStream({ onDone: () => friendsLoadDoneRef.current?.() });
+    });
+    friendsLoadDoneRef.current = null;
+
+    if (selected.size >= 1) {
+      await runCompare(true);
+    }
+  }, [session?.user?.steamId, selected, connectFriendsStream, runCompare]);
 
   const handleSortChange = useCallback((mode: SortMode) => {
     setSort(mode);

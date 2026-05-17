@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { invalidateOwnedGames } from "@/lib/steam/client";
+import {
+  invalidateAllAppMeta,
+  invalidateOwnedGames,
+} from "@/lib/steam/client";
 
 export async function POST(request: NextRequest) {
   const session = await auth();
@@ -18,7 +21,10 @@ export async function POST(request: NextRequest) {
     ...steamIds.filter((id): id is string => typeof id === "string"),
   ]);
 
-  await Promise.all([...allIds].map((id) => invalidateOwnedGames(id)));
+  await Promise.all([
+    ...[...allIds].map((id) => invalidateOwnedGames(id)),
+    invalidateAllAppMeta(),
+  ]);
 
   return NextResponse.json({ ok: true });
 }

@@ -17,7 +17,11 @@ const TIP_KEYS = [
   "tip9",
 ] as const;
 
-export type FriendsLoadPhase = "friends" | "profiles" | "libraries";
+export type FriendsLoadPhase =
+  | "friends"
+  | "profiles"
+  | "libraries"
+  | "metadata";
 
 export interface FriendsLoadCurrentFriend {
   steamid: string;
@@ -40,8 +44,15 @@ function progressPercent(
   if (!phase) return 0;
   if (phase === "friends") return 8;
   if (phase === "profiles") return 18;
-  if (total <= 0) return 100;
-  return 18 + (loaded / total) * 82;
+  if (phase === "libraries") {
+    if (total <= 0) return 50;
+    return 18 + (loaded / total) * 32;
+  }
+  if (phase === "metadata") {
+    if (total <= 0) return 100;
+    return 50 + (loaded / total) * 50;
+  }
+  return 100;
 }
 
 export function FriendsLoadModal({
@@ -67,14 +78,18 @@ export function FriendsLoadModal({
     if (phase === "friends") return t("phaseFriends");
     if (phase === "profiles") return t("phaseProfiles");
     if (phase === "libraries") return t("phaseLibraries");
+    if (phase === "metadata") return t("phaseMetadata");
     return t("phaseFriends");
   }, [phase, t]);
 
   const factsLine = useMemo(() => {
+    if (phase === "metadata" && total > 0) {
+      return t("progressMetadata", { loaded, total });
+    }
     if (phase === "libraries" && total > 0) {
       return t("progressLibraries", { loaded, total });
     }
-    if (total > 0) {
+    if (total > 0 && phase === "profiles") {
       return t("progressProfiles", { total });
     }
     return null;
@@ -105,7 +120,7 @@ export function FriendsLoadModal({
 
         <p className="mb-1 text-center text-xs text-[var(--steam-muted)]">
           {phaseLabel}
-          {phase === "libraries" && total > 0 && (
+          {(phase === "libraries" || phase === "metadata") && total > 0 && (
             <span className="ml-1 tabular-nums">({Math.round(percent)}%)</span>
           )}
         </p>

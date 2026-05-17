@@ -2,9 +2,11 @@ import {
   cacheDelete,
   cacheGet,
   cacheSet,
+  invalidateAllAppMeta,
   ownedGamesCacheKey,
   appMetaCacheKey,
 } from "@/lib/cache";
+import { mapWithConcurrency } from "@/lib/steam/pool";
 import type {
   AppDetails,
   FriendEntry,
@@ -178,6 +180,12 @@ export async function invalidateOwnedGames(steamId: string): Promise<void> {
   await cacheDelete(ownedGamesCacheKey(steamId));
 }
 
+export async function invalidateAppMeta(appId: number): Promise<void> {
+  await cacheDelete(appMetaCacheKey(appId));
+}
+
+export { invalidateAllAppMeta };
+
 export async function getAppDetails(appId: number): Promise<AppDetails | null> {
   const cacheKey = appMetaCacheKey(appId);
   const cached = await cacheGet<AppDetails>(cacheKey);
@@ -219,18 +227,22 @@ export async function getAppDetails(appId: number): Promise<AppDetails | null> {
 
 export async function getAppDetailsBatch(
   appIds: number[],
-  delayMs = 300
+  options?: { concurrency?: number }
 ): Promise<Map<number, AppDetails>> {
+  const uniqueIds = [...new Set(appIds)];
+  if (uniqueIds.length === 0) return new Map();
+
+  const concurrency = options?.concurrency ?? 4;
+  const detailsList = await mapWithConcurrency(
+    uniqueIds,
+    async (appId) => ({ appId, details: await getAppDetails(appId) }),
+    concurrency
+  );
+
   const result = new Map<number, AppDetails>();
-
-  for (const appId of appIds) {
-    const details = await getAppDetails(appId);
+  for (const { appId, details } of detailsList) {
     if (details) result.set(appId, details);
-    if (delayMs > 0) {
-      await new Promise((r) => setTimeout(r, delayMs));
-    }
   }
-
   return result;
 }
 

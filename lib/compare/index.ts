@@ -1,6 +1,16 @@
+import { cacheGet, appMetaCacheKey } from "@/lib/cache";
 import { sortGames } from "@/lib/compare/sort";
-import { getAppDetailsBatch, getOwnedGames, getPlayerSummaries } from "@/lib/steam/client";
-import { getMultiplayerTags } from "@/lib/steam/multiplayer";
+import {
+  buildCompareGame,
+  buildPlaytimeMap,
+  resolveCompareAppIds,
+} from "@/lib/compare/build";
+import {
+  getAppDetails,
+  getOwnedGames,
+  getPlayerSummaries,
+} from "@/lib/steam/client";
+import type { AppDetails } from "@/lib/steam/types";
 import type {
   CompareGameResult,
   CompareResponse,
@@ -30,83 +40,17 @@ async function loadLibrary(
   };
 }
 
-function intersectAppIds(libraries: PersonLibrary[]): Set<number> {
-  const accessible = libraries.filter((l) => l.status === "ok");
-  if (accessible.length === 0) return new Set();
-
-  let intersection = new Set(accessible[0].games.map((g) => g.appid));
-
-  for (let i = 1; i < accessible.length; i++) {
-    const ids = new Set(accessible[i].games.map((g) => g.appid));
-    intersection = new Set([...intersection].filter((id) => ids.has(id)));
-  }
-
-  return intersection;
+async function getCachedAppDetails(appId: number): Promise<AppDetails | null> {
+  return cacheGet<AppDetails>(appMetaCacheKey(appId));
 }
 
-function collectNearSharedAppIds(
-  libraries: PersonLibrary[]
-): Map<number, string[]> {
-  const accessible = libraries.filter((l) => l.status === "ok");
-  const result = new Map<number, string[]>();
-  if (accessible.length === 0) return result;
+export type CompareStreamSend = (event: string, data: unknown) => void;
 
-  const ownerSets = accessible.map((lib) => ({
-    steamId: lib.steamId,
-    ids: new Set(lib.games.map((g) => g.appid)),
-  }));
-
-  const allAppIds = new Set<number>();
-  for (const { ids } of ownerSets) {
-    for (const id of ids) allAppIds.add(id);
-  }
-
-  for (const appId of allAppIds) {
-    const missingOwners: string[] = [];
-    for (const { steamId, ids } of ownerSets) {
-      if (!ids.has(appId)) missingOwners.push(steamId);
-    }
-    if (missingOwners.length <= 1) {
-      result.set(appId, missingOwners);
-    }
-  }
-
-  return result;
-}
-
-function buildPlaytimeMap(
-  libraries: PersonLibrary[]
-): Map<number, Record<string, number>> {
-  const map = new Map<number, Record<string, number>>();
-
-  for (const lib of libraries) {
-    if (lib.status !== "ok") continue;
-    for (const game of lib.games) {
-      const existing = map.get(game.appid) ?? {};
-      existing[lib.steamId] = game.playtime_forever ?? 0;
-      map.set(game.appid, existing);
-    }
-  }
-
-  return map;
-}
-
-function getGameName(libraries: PersonLibrary[], appId: number): string {
-  for (const lib of libraries) {
-    const game = lib.games.find((g) => g.appid === appId);
-    if (game?.name) return game.name;
-  }
-  return `App ${appId}`;
-}
-
-export async function compareLibraries(options: {
+async function prepareCompareContext(options: {
   mySteamId: string;
   friendSteamIds: string[];
-  multiplayerOnly: boolean;
-  sort: SortMode;
-  matchMode?: MatchMode;
   skipCache?: boolean;
-}): Promise<CompareResponse> {
+}) {
   const allIds = [options.mySteamId, ...options.friendSteamIds];
   const profiles = await getPlayerSummaries(allIds);
   const profileMap = new Map(profiles.map((p) => [p.steamid, p]));
@@ -128,52 +72,123 @@ export async function compareLibraries(options: {
     return lib?.status !== "ok";
   });
 
-  const matchMode = options.matchMode ?? "strict";
-  const nearMap =
-    matchMode === "near" ? collectNearSharedAppIds(libraries) : null;
-  const appIds =
-    matchMode === "near"
-      ? [...(nearMap?.keys() ?? [])]
-      : [...intersectAppIds(libraries)];
+  return { libraries, excludedFriends };
+}
 
+function buildParticipants(libraries: PersonLibrary[]) {
+  return libraries.map((lib) => ({
+    steamId: lib.steamId,
+    displayName: lib.displayName ?? lib.steamId,
+    avatarUrl: lib.avatarUrl,
+    status: lib.status as LibraryStatus,
+    lastUpdated: lib.lastUpdated,
+  }));
+}
+
+export async function compareLibraries(options: {
+  mySteamId: string;
+  friendSteamIds: string[];
+  multiplayerOnly: boolean;
+  sort: SortMode;
+  matchMode?: MatchMode;
+  skipCache?: boolean;
+}): Promise<CompareResponse> {
+  const { libraries, excludedFriends } = await prepareCompareContext(options);
+  const matchMode = options.matchMode ?? "strict";
+  const { appIds, nearMap } = resolveCompareAppIds(libraries, matchMode);
   const playtimeMap = buildPlaytimeMap(libraries);
 
-  const metaMap = await getAppDetailsBatch(appIds, 200);
-
   const games: CompareGameResult[] = [];
+  const pendingIds: number[] = [];
 
   for (const appId of appIds) {
-    const meta = metaMap.get(appId);
-    if (meta && !meta.isPlayableGame) continue;
-    if (options.multiplayerOnly && meta && !meta.isMultiplayer) continue;
-    if (options.multiplayerOnly && !meta) continue;
-
-    const playtimes = playtimeMap.get(appId) ?? {};
-    const combinedPlaytime = Object.values(playtimes).reduce((a, b) => a + b, 0);
-    const missingOwners =
-      matchMode === "near" ? (nearMap?.get(appId) ?? []) : [];
-
-    games.push({
-      appid: appId,
-      name: meta?.name ?? getGameName(libraries, appId),
-      headerImage: meta?.header_image,
-      storeUrl: `https://store.steampowered.com/app/${appId}`,
-      multiplayerTags: meta ? getMultiplayerTags(meta.categories) : [],
-      playtimes,
-      combinedPlaytime,
-      missingOwners,
+    const meta = await getCachedAppDetails(appId);
+    if (!meta && options.multiplayerOnly) {
+      pendingIds.push(appId);
+      continue;
+    }
+    const details = meta ?? (await getAppDetails(appId));
+    const game = buildCompareGame(appId, libraries, playtimeMap, details, {
+      multiplayerOnly: options.multiplayerOnly,
+      matchMode,
+      nearMap,
     });
+    if (game) games.push(game);
+    else if (!meta) pendingIds.push(appId);
+  }
+
+  for (const appId of pendingIds) {
+    if (games.some((g) => g.appid === appId)) continue;
+    const details = await getAppDetails(appId);
+    const game = buildCompareGame(appId, libraries, playtimeMap, details, {
+      multiplayerOnly: options.multiplayerOnly,
+      matchMode,
+      nearMap,
+    });
+    if (game) games.push(game);
   }
 
   return {
     games: sortGames(games, options.sort),
-    participants: libraries.map((lib) => ({
-      steamId: lib.steamId,
-      displayName: lib.displayName ?? lib.steamId,
-      avatarUrl: lib.avatarUrl,
-      status: lib.status as LibraryStatus,
-      lastUpdated: lib.lastUpdated,
-    })),
+    participants: buildParticipants(libraries),
     excludedFriends,
   };
+}
+
+export async function compareLibrariesStream(
+  options: {
+    mySteamId: string;
+    friendSteamIds: string[];
+    multiplayerOnly: boolean;
+    sort: SortMode;
+    matchMode?: MatchMode;
+    skipCache?: boolean;
+  },
+  send: CompareStreamSend
+): Promise<void> {
+  const { libraries, excludedFriends } = await prepareCompareContext(options);
+  const matchMode = options.matchMode ?? "strict";
+  const { appIds, nearMap } = resolveCompareAppIds(libraries, matchMode);
+  const playtimeMap = buildPlaytimeMap(libraries);
+
+  const games: CompareGameResult[] = [];
+  const pendingIds: number[] = [];
+
+  for (const appId of appIds) {
+    const meta = await getCachedAppDetails(appId);
+    if (!meta && options.multiplayerOnly) {
+      pendingIds.push(appId);
+      continue;
+    }
+    const game = buildCompareGame(appId, libraries, playtimeMap, meta, {
+      multiplayerOnly: options.multiplayerOnly,
+      matchMode,
+      nearMap,
+    });
+    if (game) games.push(game);
+    else if (!meta) pendingIds.push(appId);
+  }
+
+  send("result", {
+    games: sortGames(games, options.sort),
+    participants: buildParticipants(libraries),
+    excludedFriends,
+  });
+
+  const seen = new Set(games.map((g) => g.appid));
+
+  for (const appId of pendingIds) {
+    if (seen.has(appId)) continue;
+    const details = await getAppDetails(appId);
+    const game = buildCompareGame(appId, libraries, playtimeMap, details, {
+      multiplayerOnly: options.multiplayerOnly,
+      matchMode,
+      nearMap,
+    });
+    if (!game) continue;
+    seen.add(appId);
+    send("game_update", { game });
+  }
+
+  send("done", {});
 }

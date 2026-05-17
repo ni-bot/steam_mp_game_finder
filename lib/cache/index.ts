@@ -77,3 +77,14 @@ export function ownedGamesCacheKey(steamId: string): string {
 export function appMetaCacheKey(appId: number): string {
   return `appmeta:${appId}`;
 }
+
+export async function invalidateAllAppMeta(): Promise<void> {
+  if (redis) {
+    return;
+  }
+  for (const key of memoryStore.keys()) {
+    if (key.startsWith("appmeta:")) {
+      memoryStore.delete(key);
+    }
+  }
+}

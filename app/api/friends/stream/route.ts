@@ -1,9 +1,19 @@
 import { auth } from "@/auth";
 import { sseEncode } from "@/lib/sse";
-import { getFriendList, getPlayerSummaries } from "@/lib/steam/client";
+import {
+  collectPairwiseAppIds,
+  prewarmAppDetails,
+} from "@/lib/steam/prewarm";
+import {
+  fetchOwnedGames,
+  getFriendList,
+  getOwnedGames,
+  getPlayerSummaries,
+} from "@/lib/steam/client";
 import { probeLibraryStatusMapWithProgress } from "@/lib/steam/library-status";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 export async function GET() {
   const session = await auth();
@@ -11,6 +21,7 @@ export async function GET() {
     return new Response("Unauthorized", { status: 401 });
   }
 
+  const mySteamId = session.user.steamId;
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
@@ -20,50 +31,84 @@ export async function GET() {
 
       try {
         send("phase", { phase: "friends" });
-        const friends = await getFriendList(session.user.steamId);
+        const friends = await getFriendList(mySteamId);
         const friendIds = friends.map((f) => f.steamid);
 
-        if (friendIds.length === 0) {
-          send("done", { friends: [] });
-          return;
-        }
-
-        send("total", { total: friendIds.length });
         send("phase", { phase: "profiles" });
-
-        const profiles = await getPlayerSummaries(friendIds);
+        const profiles =
+          friendIds.length > 0
+            ? await getPlayerSummaries(friendIds)
+            : [];
         const profileMap = new Map(profiles.map((p) => [p.steamid, p]));
+
+        if (friendIds.length > 0) {
+          send("total", { total: friendIds.length });
+        }
 
         send("phase", { phase: "libraries" });
 
-        const libraryStatusMap = await probeLibraryStatusMapWithProgress(
-          friendIds,
-          {
-            onProgress: ({ steamId, status, loaded, total }) => {
-              const profile = profileMap.get(steamId);
-              send("progress", {
-                loaded,
-                total,
-                steamid: steamId,
-                personaname: profile?.personaname ?? steamId,
-                avatarfull: profile?.avatarfull ?? "",
-                libraryStatus: status,
-              });
-            },
-          }
-        );
+        const [, libraryStatusMap] = await Promise.all([
+          fetchOwnedGames(mySteamId),
+          friendIds.length > 0
+            ? probeLibraryStatusMapWithProgress(friendIds, {
+                onProgress: ({ steamId, status, loaded, total }) => {
+                  const profile = profileMap.get(steamId);
+                  send("progress", {
+                    kind: "library",
+                    loaded,
+                    total,
+                    steamid: steamId,
+                    personaname: profile?.personaname ?? steamId,
+                    avatarfull: profile?.avatarfull ?? "",
+                    libraryStatus: status,
+                  });
+                },
+              })
+            : Promise.resolve(new Map<string, "ok" | "private" | "error">()),
+        ]);
 
-        const result = friends.map((f) => {
-          const profile = profileMap.get(f.steamid);
-          return {
-            steamid: f.steamid,
-            personaname: profile?.personaname ?? f.steamid,
-            avatarfull: profile?.avatarfull ?? "",
-            libraryStatus: libraryStatusMap.get(f.steamid) ?? "error",
-          };
-        });
+        const result =
+          friendIds.length === 0
+            ? []
+            : friends.map((f) => {
+                const profile = profileMap.get(f.steamid);
+                return {
+                  steamid: f.steamid,
+                  personaname: profile?.personaname ?? f.steamid,
+                  avatarfull: profile?.avatarfull ?? "",
+                  libraryStatus:
+                    libraryStatusMap.get(f.steamid) ?? "error",
+                };
+              });
 
         result.sort((a, b) => a.personaname.localeCompare(b.personaname));
+
+        const okFriendIds = friendIds.filter(
+          (id) => libraryStatusMap.get(id) === "ok"
+        );
+        const friendPayloads = await Promise.all(
+          okFriendIds.map((id) => getOwnedGames(id))
+        );
+        const pairwiseAppIds = collectPairwiseAppIds(
+          friendPayloads.filter((p): p is NonNullable<typeof p> => p !== null)
+        );
+
+        if (pairwiseAppIds.length > 0) {
+          send("phase", { phase: "metadata" });
+          send("metadata_total", { total: pairwiseAppIds.length });
+
+          await prewarmAppDetails(pairwiseAppIds, {
+            onProgress: ({ loaded, total, appId }) => {
+              send("progress", {
+                kind: "metadata",
+                loaded,
+                total,
+                appId,
+              });
+            },
+          });
+        }
+
         send("done", { friends: result });
       } catch (error) {
         console.error("Friends stream failed:", error);
