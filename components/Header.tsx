@@ -33,7 +33,7 @@ export function Header({
   const switchedPath = pathname.replace(`/${locale}`, `/${otherLocale}`);
 
   return (
-    <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-[var(--steam-border)] bg-[var(--steam-bg-dark)] px-6 py-4">
+    <header className="grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-[var(--steam-border)] bg-[var(--steam-bg-dark)] px-6 py-4">
       <div className="min-w-0 justify-self-start">
         <h1 className="text-xl font-semibold text-[var(--steam-accent)]">
           {t("app.title")}

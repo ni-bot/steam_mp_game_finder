@@ -122,7 +122,7 @@ export function AppShell() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-screen flex-col overflow-hidden">
       <Header
         onRefresh={session ? handleRefresh : undefined}
         showRefresh={!!session && !!result}
@@ -154,10 +154,10 @@ export function AppShell() {
             selected={selected}
             onSelectionChange={setSelected}
           />
-          <div className="flex min-h-0 flex-1 pt-14">
-          <div className="w-full max-w-sm shrink-0">
+          <div className="flex min-h-0 flex-1 overflow-hidden pt-14">
+          <div className="flex h-full w-full max-w-sm shrink-0 flex-col overflow-hidden">
             {loadingFriends && (
-              <p className="p-4 text-sm text-[var(--steam-muted)]">…</p>
+              <p className="shrink-0 p-4 text-sm text-[var(--steam-muted)]">…</p>
             )}
             <FriendPicker
               friends={friends}

@@ -171,22 +171,24 @@ export function FriendPicker({
   const manySelected = selected.size >= 10;
 
   return (
-    <aside className="flex h-full flex-col border-r border-[var(--steam-border)] bg-[var(--steam-bg-dark)] p-4">
-      <h2 className="mb-3 text-lg font-semibold text-[var(--steam-accent)]">
-        {t("title")}
-      </h2>
+    <aside className="flex min-h-0 flex-1 flex-col border-r border-[var(--steam-border)] bg-[var(--steam-bg-dark)]">
+      <div className="shrink-0 p-4 pb-3">
+        <h2 className="mb-3 text-lg font-semibold text-[var(--steam-accent)]">
+          {t("title")}
+        </h2>
 
-      <p className="mb-3 text-xs text-[var(--steam-muted)]">{t("privacyHint")}</p>
+        <p className="mb-3 text-xs text-[var(--steam-muted)]">{t("privacyHint")}</p>
 
-      <input
-        type="search"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder={t("search")}
-        className="mb-3 w-full rounded border border-[var(--steam-border)] bg-[var(--steam-bg)] px-3 py-2 text-sm outline-none focus:border-[var(--steam-accent)]"
-      />
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t("search")}
+          className="w-full rounded border border-[var(--steam-border)] bg-[var(--steam-bg)] px-3 py-2 text-sm outline-none focus:border-[var(--steam-accent)]"
+        />
+      </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto space-y-3">
+      <div className="min-h-0 flex-1 overflow-y-auto space-y-3 px-4 pb-3">
         {filtered.length === 0 ? (
           <p className="text-sm text-[var(--steam-muted)]">{t("noFriends")}</p>
         ) : (
@@ -231,7 +233,7 @@ export function FriendPicker({
         )}
       </div>
 
-      <div className="mt-4 border-t border-[var(--steam-border)] pt-4">
+      <div className="shrink-0 border-t border-[var(--steam-border)] bg-[var(--steam-bg-dark)] p-4">
         <label className="mb-1 block text-xs text-[var(--steam-muted)]">
           {t("manualLabel")}
         </label>
@@ -255,14 +257,13 @@ export function FriendPicker({
         {resolveError && (
           <p className="mt-1 text-xs text-red-400">{resolveError}</p>
         )}
+        {!canCompare && (
+          <p className="mt-3 text-xs text-amber-400">{t("minOne")}</p>
+        )}
+        {manySelected && (
+          <p className="mt-2 text-xs text-amber-400">{t("manyWarning")}</p>
+        )}
       </div>
-
-      {!canCompare && (
-        <p className="mt-3 text-xs text-amber-400">{t("minOne")}</p>
-      )}
-      {manySelected && (
-        <p className="mt-2 text-xs text-amber-400">{t("manyWarning")}</p>
-      )}
     </aside>
   );
 }
