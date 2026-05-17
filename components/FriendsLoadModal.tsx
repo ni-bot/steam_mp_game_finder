@@ -4,18 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { PersonLabel } from "@/components/PersonLabel";
 
-const TIP_KEYS = [
-  "tip0",
-  "tip1",
-  "tip2",
-  "tip3",
-  "tip4",
-  "tip5",
-  "tip6",
-  "tip7",
-  "tip8",
-  "tip9",
-] as const;
+const TIP_COUNT = 40;
+const TIP_KEYS = Array.from(
+  { length: TIP_COUNT },
+  (_, i) => `tip${i}` as `tip${number}`
+);
 
 export type FriendsLoadPhase =
   | "friends"
