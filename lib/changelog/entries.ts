@@ -404,4 +404,22 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
       ],
     },
   },
+  {
+    version: "0.24",
+    commit: "f5ecbce8783fee889e87a2d005e112677baa88ed",
+    title: {
+      de: "Versionshistorie",
+      en: "Version history",
+    },
+    bullets: {
+      de: [
+        "„Änderungen“ im Benutzermenü öffnet eine Übersicht aller Versionen",
+        "Einträge auf Deutsch und Englisch, neueste zuerst",
+      ],
+      en: [
+        "“Changes” in the user menu opens a list of all releases",
+        "Entries in German and English, newest first",
+      ],
+    },
+  },
 ];

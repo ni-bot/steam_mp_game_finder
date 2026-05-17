@@ -2,16 +2,16 @@ import { describe, expect, it } from "vitest";
 import { CHANGELOG_ENTRIES, getChangelogForLocale } from "./index";
 
 describe("changelog", () => {
-  it("has 23 entries with versions 0.1 through 0.23", () => {
-    expect(CHANGELOG_ENTRIES).toHaveLength(23);
+  it("has 24 entries with versions 0.1 through 0.24", () => {
+    expect(CHANGELOG_ENTRIES).toHaveLength(24);
     expect(CHANGELOG_ENTRIES[0]?.version).toBe("0.1");
-    expect(CHANGELOG_ENTRIES[22]?.version).toBe("0.23");
+    expect(CHANGELOG_ENTRIES[23]?.version).toBe("0.24");
   });
 
   it("returns entries newest first with localized text", () => {
     const de = getChangelogForLocale("de");
-    expect(de).toHaveLength(23);
-    expect(de[0]?.version).toBe("0.23");
+    expect(de).toHaveLength(24);
+    expect(de[0]?.version).toBe("0.24");
     expect(de[0]?.title.length).toBeGreaterThan(0);
     expect(de[0]?.bullets.length).toBeGreaterThan(0);
 
