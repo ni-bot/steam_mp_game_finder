@@ -51,11 +51,7 @@ export interface PersonLibrary {
   avatarUrl?: string;
 }
 
-export type SortMode =
-  | "low_playtime"
-  | "high_playtime"
-  | "alpha"
-  | "recent";
+export type SortMode = "low_playtime" | "high_playtime" | "alpha";
 
 export type MatchMode = "strict" | "near";
 
@@ -67,7 +63,6 @@ export interface CompareGameResult {
   multiplayerTags: string[];
   playtimes: Record<string, number>;
   combinedPlaytime: number;
-  maxLastPlayed: number;
   missingOwners: string[];
 }
 

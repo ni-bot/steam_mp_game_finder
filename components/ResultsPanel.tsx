@@ -131,7 +131,6 @@ export function ResultsPanel({
             <option value="low_playtime">{t("sortLowPlaytime")}</option>
             <option value="high_playtime">{t("sortHighPlaytime")}</option>
             <option value="alpha">{t("sortAlpha")}</option>
-            <option value="recent">{t("sortRecent")}</option>
           </select>
         </label>
       </div>

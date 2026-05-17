@@ -44,7 +44,6 @@
     "sortLowPlaytime": "Niedrigste Gesamtspielzeit",
     "sortHighPlaytime": "Höchste Gesamtspielzeit",
     "sortAlpha": "Alphabetisch",
-    "sortRecent": "Zuletzt gespielt",
     "playtime": "{hours}h",
     "playtimeMinutes": "{minutes} Min.",
     "neverPlayed": "Nie gespielt",

@@ -91,23 +91,6 @@ function buildPlaytimeMap(
   return map;
 }
 
-function buildLastPlayedMap(
-  libraries: PersonLibrary[]
-): Map<number, Record<string, number>> {
-  const map = new Map<number, Record<string, number>>();
-
-  for (const lib of libraries) {
-    if (lib.status !== "ok") continue;
-    for (const game of lib.games) {
-      const existing = map.get(game.appid) ?? {};
-      existing[lib.steamId] = game.rtime_last_played ?? 0;
-      map.set(game.appid, existing);
-    }
-  }
-
-  return map;
-}
-
 function getGameName(libraries: PersonLibrary[], appId: number): string {
   for (const lib of libraries) {
     const game = lib.games.find((g) => g.appid === appId);
@@ -154,7 +137,6 @@ export async function compareLibraries(options: {
       : [...intersectAppIds(libraries)];
 
   const playtimeMap = buildPlaytimeMap(libraries);
-  const lastPlayedMap = buildLastPlayedMap(libraries);
 
   const metaMap = await getAppDetailsBatch(appIds, 200);
 
@@ -167,9 +149,7 @@ export async function compareLibraries(options: {
     if (options.multiplayerOnly && !meta) continue;
 
     const playtimes = playtimeMap.get(appId) ?? {};
-    const lastPlayed = lastPlayedMap.get(appId) ?? {};
     const combinedPlaytime = Object.values(playtimes).reduce((a, b) => a + b, 0);
-    const maxLastPlayed = Math.max(0, ...Object.values(lastPlayed));
     const missingOwners =
       matchMode === "near" ? (nearMap?.get(appId) ?? []) : [];
 
@@ -181,7 +161,6 @@ export async function compareLibraries(options: {
       multiplayerTags: meta ? getMultiplayerTags(meta.categories) : [],
       playtimes,
       combinedPlaytime,
-      maxLastPlayed,
       missingOwners,
     });
   }

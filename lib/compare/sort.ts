@@ -13,9 +13,6 @@ export function sortGames(
     case "alpha":
       sorted.sort((a, b) => a.name.localeCompare(b.name));
       break;
-    case "recent":
-      sorted.sort((a, b) => b.maxLastPlayed - a.maxLastPlayed);
-      break;
     case "low_playtime":
     default:
       sorted.sort((a, b) => a.combinedPlaytime - b.combinedPlaytime);

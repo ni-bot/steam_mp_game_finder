@@ -44,7 +44,6 @@
     "sortLowPlaytime": "Lowest combined playtime",
     "sortHighPlaytime": "Highest combined playtime",
     "sortAlpha": "Alphabetical",
-    "sortRecent": "Recently played",
     "playtime": "{hours}h",
     "playtimeMinutes": "{minutes} min",
     "neverPlayed": "Never played",
