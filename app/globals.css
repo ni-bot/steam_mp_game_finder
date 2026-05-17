@@ -16,3 +16,38 @@ body {
   color: #c7d5e0;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
+
+/* Scrollbars: track = page bg, thumb = GameCard bg, no arrow buttons */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--steam-bg-dark) var(--steam-bg);
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--steam-bg);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--steam-bg-dark);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-button,
+*::-webkit-scrollbar-button:single-button,
+*::-webkit-scrollbar-button:vertical:start:decrement,
+*::-webkit-scrollbar-button:vertical:end:increment,
+*::-webkit-scrollbar-button:horizontal:start:decrement,
+*::-webkit-scrollbar-button:horizontal:end:increment {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+*::-webkit-scrollbar-corner {
+  background: var(--steam-bg);
+}
