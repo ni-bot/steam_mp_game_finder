@@ -422,4 +422,38 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
       ],
     },
   },
+  {
+    version: "0.25",
+    commit: "50d2b292115bcf8ec4dc46e1758711c9f05c222c",
+    title: {
+      de: "Changelog vervollständigt",
+      en: "Changelog completed",
+    },
+    bullets: {
+      de: [
+        "Eintrag für Version 0.24 in der Versionshistorie ergänzt",
+      ],
+      en: [
+        "Added the missing v0.24 entry in the version history",
+      ],
+    },
+  },
+  {
+    version: "0.26",
+    commit: "212f7b35b6fa3ce41c211ca3fbe448bc3dece846",
+    title: {
+      de: "Stabilerer Deploy-Build",
+      en: "More reliable deploy builds",
+    },
+    bullets: {
+      de: [
+        "Build auf Vercel schlägt nicht mehr wegen der Changelog-Prüfung fehl",
+        "Funktioniert auch bei flachem Git-Clone auf dem Hosting",
+      ],
+      en: [
+        "Vercel builds no longer fail on the changelog check",
+        "Works with shallow git clones on the host",
+      ],
+    },
+  },
 ];
