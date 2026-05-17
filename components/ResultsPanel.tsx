@@ -1,9 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { GameCard } from "@/components/GameCard";
 import { FriendStatusBadge } from "@/components/FriendStatusBadge";
 import { PersonLabel } from "@/components/PersonLabel";
+import { filterGamesByBuyer } from "@/lib/compare/filter-by-buyer";
 import type { CompareResponse, MatchMode, SortMode } from "@/lib/steam/types";
 
 interface ResultsPanelProps {
@@ -12,6 +14,8 @@ interface ResultsPanelProps {
   onMultiplayerOnlyChange: (value: boolean) => void;
   matchMode: MatchMode;
   onMatchModeChange: (value: MatchMode) => void;
+  buyerFilterSteamId: string | null;
+  onBuyerFilterChange: (steamId: string | null) => void;
   sort: SortMode;
   onSortChange: (value: SortMode) => void;
   loading?: boolean;
@@ -56,12 +60,33 @@ export function ResultsPanel({
   onMultiplayerOnlyChange,
   matchMode,
   onMatchModeChange,
+  buyerFilterSteamId,
+  onBuyerFilterChange,
   sort,
   onSortChange,
   loading,
 }: ResultsPanelProps) {
   const t = useTranslations("results");
   const locale = useLocale();
+
+  const okParticipants = useMemo(
+    () => result?.participants.filter((p) => p.status === "ok") ?? [],
+    [result?.participants]
+  );
+
+  const displayGames = useMemo(() => {
+    if (!result) return [];
+    if (matchMode !== "near") return result.games;
+    return filterGamesByBuyer(result.games, buyerFilterSteamId);
+  }, [result, matchMode, buyerFilterSteamId]);
+
+  const buyerFilterName = useMemo(() => {
+    if (!buyerFilterSteamId) return null;
+    return (
+      okParticipants.find((p) => p.steamId === buyerFilterSteamId)
+        ?.displayName ?? buyerFilterSteamId
+    );
+  }, [buyerFilterSteamId, okParticipants]);
 
   return (
     <main className="flex min-h-0 flex-1 flex-col overflow-hidden p-6">
@@ -120,6 +145,26 @@ export function ResultsPanel({
             {t("matchNear")}
           </span>
         </div>
+
+        {matchMode === "near" && (
+          <label className="flex items-center gap-2 text-sm text-[var(--steam-muted)]">
+            {t("matchNearBuyerFilter")}
+            <select
+              value={buyerFilterSteamId ?? ""}
+              onChange={(e) =>
+                onBuyerFilterChange(e.target.value || null)
+              }
+              className="rounded border border-[var(--steam-border)] bg-[var(--steam-bg-dark)] px-2 py-1 text-[var(--steam-text)]"
+            >
+              <option value="">{t("matchNearBuyerAll")}</option>
+              {okParticipants.map((p) => (
+                <option key={p.steamId} value={p.steamId}>
+                  {p.displayName}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
 
         <label className="flex items-center gap-2 text-sm text-[var(--steam-muted)]">
           {t("sort")}
@@ -191,18 +236,28 @@ export function ResultsPanel({
           </div>
         )}
 
-        {!loading && result && result.games.length > 0 && (
+        {!loading &&
+          result &&
+          result.games.length > 0 &&
+          displayGames.length === 0 &&
+          buyerFilterName && (
+            <div className="rounded border border-[var(--steam-border)] bg-[var(--steam-bg-dark)] p-8 text-center">
+              <p className="text-lg">
+                {t("emptyBuyerFilter", { name: buyerFilterName })}
+              </p>
+            </div>
+          )}
+
+        {!loading && result && displayGames.length > 0 && (
           <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-            {result.games.map((game) => (
+            {displayGames.map((game) => (
               <GameCard
                 key={game.appid}
                 game={game}
-                participants={result.participants
-                  .filter((p) => p.status === "ok")
-                  .map((p) => ({
-                    steamId: p.steamId,
-                    name: p.displayName,
-                  }))}
+                participants={okParticipants.map((p) => ({
+                  steamId: p.steamId,
+                  name: p.displayName,
+                }))}
               />
             ))}
           </div>

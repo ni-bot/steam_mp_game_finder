@@ -29,6 +29,9 @@ export function AppShell() {
   const [result, setResult] = useState<CompareResponse | null>(null);
   const [multiplayerOnly, setMultiplayerOnly] = useState(true);
   const [matchMode, setMatchMode] = useState<MatchMode>("strict");
+  const [buyerFilterSteamId, setBuyerFilterSteamId] = useState<string | null>(
+    null
+  );
   const [sort, setSort] = useState<SortMode>("low_playtime");
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [loadingCompare, setLoadingCompare] = useState(false);
@@ -108,6 +111,12 @@ export function AppShell() {
   }, []);
 
   useEffect(() => {
+    if (matchMode === "near") {
+      setBuyerFilterSteamId(null);
+    }
+  }, [matchMode]);
+
+  useEffect(() => {
     if (!result || selected.size < 1) return;
     runCompare(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -178,6 +187,8 @@ export function AppShell() {
               onMultiplayerOnlyChange={setMultiplayerOnly}
               matchMode={matchMode}
               onMatchModeChange={setMatchMode}
+              buyerFilterSteamId={buyerFilterSteamId}
+              onBuyerFilterChange={setBuyerFilterSteamId}
               sort={sort}
               onSortChange={handleSortChange}
               loading={loadingCompare}
