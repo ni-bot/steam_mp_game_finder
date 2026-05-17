@@ -64,8 +64,8 @@ export function ResultsPanel({
   const locale = useLocale();
 
   return (
-    <main className="flex min-h-0 flex-1 flex-col p-6">
-      <div className="mb-4 flex flex-wrap items-center gap-4">
+    <main className="flex min-h-0 flex-1 flex-col overflow-hidden p-6">
+      <div className="mb-4 flex shrink-0 flex-wrap items-center gap-4">
         <h2 className="text-lg font-semibold text-[var(--steam-accent)]">
           {t("title")}
         </h2>
@@ -136,13 +136,13 @@ export function ResultsPanel({
       </div>
 
       {matchMode === "near" && (
-        <p className="mb-4 text-sm text-[var(--steam-muted)]">
+        <p className="mb-4 shrink-0 text-sm text-[var(--steam-muted)]">
           {t("matchNearHint")}
         </p>
       )}
 
       {result?.participants && result.participants.length > 0 && (
-        <div className="mb-4 space-y-3">
+        <div className="mb-4 shrink-0 space-y-3">
           {result.participants.filter((p) => p.status === "ok").length > 0 && (
             <div className="flex flex-wrap gap-3">
               {result.participants
@@ -179,33 +179,35 @@ export function ResultsPanel({
         </div>
       )}
 
-      {loading && (
-        <p className="text-[var(--steam-muted)]">Loading…</p>
-      )}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {loading && (
+          <p className="text-[var(--steam-muted)]">Loading…</p>
+        )}
 
-      {!loading && result && result.games.length === 0 && (
-        <div className="rounded border border-[var(--steam-border)] bg-[var(--steam-bg-dark)] p-8 text-center">
-          <p className="text-lg">{t("empty")}</p>
-          <p className="mt-2 text-sm text-[var(--steam-muted)]">{t("emptyHint")}</p>
-        </div>
-      )}
+        {!loading && result && result.games.length === 0 && (
+          <div className="rounded border border-[var(--steam-border)] bg-[var(--steam-bg-dark)] p-8 text-center">
+            <p className="text-lg">{t("empty")}</p>
+            <p className="mt-2 text-sm text-[var(--steam-muted)]">{t("emptyHint")}</p>
+          </div>
+        )}
 
-      {!loading && result && result.games.length > 0 && (
-        <div className="grid gap-4 overflow-y-auto md:grid-cols-1 lg:grid-cols-2">
-          {result.games.map((game) => (
-            <GameCard
-              key={game.appid}
-              game={game}
-              participants={result.participants
-                .filter((p) => p.status === "ok")
-                .map((p) => ({
-                  steamId: p.steamId,
-                  name: p.displayName,
-                }))}
-            />
-          ))}
-        </div>
-      )}
+        {!loading && result && result.games.length > 0 && (
+          <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+            {result.games.map((game) => (
+              <GameCard
+                key={game.appid}
+                game={game}
+                participants={result.participants
+                  .filter((p) => p.status === "ok")
+                  .map((p) => ({
+                    steamId: p.steamId,
+                    name: p.displayName,
+                  }))}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </main>
   );
 }

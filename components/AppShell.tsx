@@ -168,9 +168,9 @@ export function AppShell() {
             />
           </div>
 
-          <div className="min-w-0 flex-1">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
             {error && (
-              <p className="p-4 text-sm text-red-400">{error}</p>
+              <p className="shrink-0 p-4 text-sm text-red-400">{error}</p>
             )}
             <ResultsPanel
               result={result}
