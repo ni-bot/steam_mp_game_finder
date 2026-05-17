@@ -1,3 +1,4 @@
+import { sortGames } from "@/lib/compare/sort";
 import { getAppDetailsBatch, getOwnedGames, getPlayerSummaries } from "@/lib/steam/client";
 import { getMultiplayerTags } from "@/lib/steam/multiplayer";
 import type {
@@ -8,6 +9,8 @@ import type {
   PersonLibrary,
   SortMode,
 } from "@/lib/steam/types";
+
+export { sortGames } from "@/lib/compare/sort";
 
 async function loadLibrary(
   steamId: string,
@@ -111,30 +114,6 @@ function getGameName(libraries: PersonLibrary[], appId: number): string {
     if (game?.name) return game.name;
   }
   return `App ${appId}`;
-}
-
-function sortGames(
-  games: CompareGameResult[],
-  mode: SortMode
-): CompareGameResult[] {
-  const sorted = [...games];
-
-  switch (mode) {
-    case "high_playtime":
-      sorted.sort((a, b) => b.combinedPlaytime - a.combinedPlaytime);
-      break;
-    case "alpha":
-      sorted.sort((a, b) => a.name.localeCompare(b.name));
-      break;
-    case "recent":
-      sorted.sort((a, b) => b.maxLastPlayed - a.maxLastPlayed);
-      break;
-    case "low_playtime":
-    default:
-      sorted.sort((a, b) => a.combinedPlaytime - b.combinedPlaytime);
-  }
-
-  return sorted;
 }
 
 export async function compareLibraries(options: {

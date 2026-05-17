@@ -9,10 +9,22 @@ import { usePathname } from "next/navigation";
 interface HeaderProps {
   onRefresh?: () => void;
   showRefresh?: boolean;
+  onCompare?: () => void;
+  showCompare?: boolean;
+  compareDisabled?: boolean;
+  compareLoading?: boolean;
 }
 
-export function Header({ onRefresh, showRefresh }: HeaderProps) {
+export function Header({
+  onRefresh,
+  showRefresh,
+  onCompare,
+  showCompare,
+  compareDisabled,
+  compareLoading,
+}: HeaderProps) {
   const t = useTranslations();
+  const tFriends = useTranslations("friends");
   const locale = useLocale();
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -21,15 +33,26 @@ export function Header({ onRefresh, showRefresh }: HeaderProps) {
   const switchedPath = pathname.replace(`/${locale}`, `/${otherLocale}`);
 
   return (
-    <header className="flex items-center justify-between border-b border-[var(--steam-border)] bg-[var(--steam-bg-dark)] px-6 py-4">
-      <div>
+    <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-[var(--steam-border)] bg-[var(--steam-bg-dark)] px-6 py-4">
+      <div className="min-w-0 justify-self-start">
         <h1 className="text-xl font-semibold text-[var(--steam-accent)]">
           {t("app.title")}
         </h1>
         <p className="text-sm text-[var(--steam-muted)]">{t("app.tagline")}</p>
       </div>
 
-      <div className="flex items-center gap-4">
+      {showCompare && onCompare && (
+        <button
+          type="button"
+          onClick={onCompare}
+          disabled={compareDisabled || compareLoading}
+          className="justify-self-center rounded bg-[#5c7e10] px-8 py-2.5 text-sm font-medium text-white hover:bg-[#6a8f12] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+        >
+          {compareLoading ? "…" : tFriends("compare")}
+        </button>
+      )}
+
+      <div className="flex items-center justify-end gap-4 justify-self-end">
         {showRefresh && onRefresh && (
           <button
             type="button"

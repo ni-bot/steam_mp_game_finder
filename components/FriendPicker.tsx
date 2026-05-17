@@ -20,8 +20,6 @@ interface FriendPickerProps {
   onManualFriendsChange: (friends: FriendOption[]) => void;
   selected: Set<string>;
   onSelectionChange: (selected: Set<string>) => void;
-  onCompare: () => void;
-  loading?: boolean;
 }
 
 function FriendRow({
@@ -67,8 +65,6 @@ export function FriendPicker({
   onManualFriendsChange,
   selected,
   onSelectionChange,
-  onCompare,
-  loading,
 }: FriendPickerProps) {
   const t = useTranslations("friends");
   const tErrors = useTranslations("errors");
@@ -265,15 +261,6 @@ export function FriendPicker({
       {manySelected && (
         <p className="mt-2 text-xs text-amber-400">{t("manyWarning")}</p>
       )}
-
-      <button
-        type="button"
-        onClick={onCompare}
-        disabled={!canCompare || loading}
-        className="mt-4 w-full rounded bg-[#5c7e10] py-2.5 text-sm font-medium text-white hover:bg-[#6a8f12] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-      >
-        {loading ? "…" : t("compare")}
-      </button>
     </aside>
   );
 }

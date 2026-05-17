@@ -7,6 +7,7 @@ import { Header } from "@/components/Header";
 import { FriendPicker, type FriendOption } from "@/components/FriendPicker";
 import { SelectedFriendsBar } from "@/components/SelectedFriendsBar";
 import { ResultsPanel } from "@/components/ResultsPanel";
+import { sortGames } from "@/lib/compare/sort";
 import type { CompareResponse, MatchMode, SortMode } from "@/lib/steam/types";
 
 export function AppShell() {
@@ -61,7 +62,6 @@ export function AppShell() {
             friendSteamIds: [...selected],
             multiplayerOnly,
             matchMode,
-            sort,
             skipCache,
           }),
         });
@@ -72,7 +72,11 @@ export function AppShell() {
           return;
         }
 
-        setResult(data as CompareResponse);
+        const compare = data as CompareResponse;
+        setResult({
+          ...compare,
+          games: sortGames(compare.games, sort),
+        });
       } catch {
         setError(tErrors("generic"));
       } finally {
@@ -96,11 +100,18 @@ export function AppShell() {
     await runCompare(true);
   }, [session?.user?.steamId, selected, runCompare]);
 
+  const handleSortChange = useCallback((mode: SortMode) => {
+    setSort(mode);
+    setResult((prev) =>
+      prev ? { ...prev, games: sortGames(prev.games, mode) } : null
+    );
+  }, []);
+
   useEffect(() => {
     if (!result || selected.size < 1) return;
     runCompare(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [multiplayerOnly, matchMode, sort]);
+  }, [multiplayerOnly, matchMode]);
 
   if (status === "loading") {
     return (
@@ -115,6 +126,10 @@ export function AppShell() {
       <Header
         onRefresh={session ? handleRefresh : undefined}
         showRefresh={!!session && !!result}
+        onCompare={session ? () => runCompare(false) : undefined}
+        showCompare={!!session}
+        compareDisabled={selected.size < 1}
+        compareLoading={loadingCompare}
       />
 
       {!session ? (
@@ -150,8 +165,6 @@ export function AppShell() {
               onManualFriendsChange={setManualFriends}
               selected={selected}
               onSelectionChange={setSelected}
-              onCompare={() => runCompare(false)}
-              loading={loadingCompare}
             />
           </div>
 
@@ -166,7 +179,7 @@ export function AppShell() {
               matchMode={matchMode}
               onMatchModeChange={setMatchMode}
               sort={sort}
-              onSortChange={setSort}
+              onSortChange={handleSortChange}
               loading={loadingCompare}
             />
           </div>
