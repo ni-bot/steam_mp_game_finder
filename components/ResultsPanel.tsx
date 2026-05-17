@@ -51,17 +51,46 @@ export function ResultsPanel({
           {multiplayerOnly ? t("multiplayerOnly") : t("showAll")}
         </label>
 
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={matchMode === "near"}
-            onChange={(e) =>
-              onMatchModeChange(e.target.checked ? "near" : "strict")
+        <div className="flex items-center gap-2 text-sm">
+          <span
+            className={
+              matchMode === "strict"
+                ? "text-[#c7d5e0]"
+                : "text-[var(--steam-muted)]"
             }
-            className="accent-[var(--steam-accent)]"
-          />
-          {matchMode === "near" ? t("matchNear") : t("matchStrict")}
-        </label>
+          >
+            {t("matchStrict")}
+          </span>
+          <label className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer">
+            <input
+              type="checkbox"
+              role="switch"
+              aria-checked={matchMode === "near"}
+              checked={matchMode === "near"}
+              onChange={(e) =>
+                onMatchModeChange(e.target.checked ? "near" : "strict")
+              }
+              className="peer sr-only"
+            />
+            <span
+              className="absolute inset-0 rounded-full border border-[var(--steam-border)] bg-[var(--steam-panel)] transition-colors peer-checked:border-[var(--steam-accent)] peer-checked:bg-[var(--steam-accent)]/25 peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--steam-accent)] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[var(--steam-bg-dark)]"
+              aria-hidden
+            />
+            <span
+              className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-[#8f98a0] shadow transition-transform peer-checked:translate-x-5 peer-checked:bg-[var(--steam-accent)]"
+              aria-hidden
+            />
+          </label>
+          <span
+            className={
+              matchMode === "near"
+                ? "text-[#c7d5e0]"
+                : "text-[var(--steam-muted)]"
+            }
+          >
+            {t("matchNear")}
+          </span>
+        </div>
 
         <label className="flex items-center gap-2 text-sm text-[var(--steam-muted)]">
           {t("sort")}
