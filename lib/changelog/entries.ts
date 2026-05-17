@@ -456,4 +456,38 @@ export const CHANGELOG_ENTRIES: ChangelogEntry[] = [
       ],
     },
   },
+  {
+    version: "0.27",
+    commit: "88ee885064948318b9892aafce8b27fd71156391",
+    title: {
+      de: "Changelog vervollständigt",
+      en: "Changelog completed",
+    },
+    bullets: {
+      de: [
+        "Einträge für Version 0.25 und 0.26 in der Versionshistorie ergänzt",
+      ],
+      en: [
+        "Added v0.25 and v0.26 entries in the version history",
+      ],
+    },
+  },
+  {
+    version: "0.28",
+    commit: "3b5856ef7dffb6513bd6396c8927332259a91bb4",
+    title: {
+      de: "Mehr Lade-Sprüche",
+      en: "More loading tips",
+    },
+    bullets: {
+      de: [
+        "30 neue Sprüche beim Laden der Freundesliste",
+        "Steam-Kultur-Humor auf Deutsch und Englisch",
+      ],
+      en: [
+        "30 new tips while loading your friend list",
+        "Steam-culture humor in German and English",
+      ],
+    },
+  },
 ];
